@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "activitiesdelegate.h"
 #include <QStandardItemModel>
 #include <QTableView>
+#include <QStandardItem>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -11,16 +11,30 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->mwStackedWidget->setCurrentIndex(0);
 
-    QStandardItemModel model(4, 2);
-    QTableView activitiesTableView;
-    activitiesTableView.setModel(&model);
+    QStandardItemModel *model = new QStandardItemModel(2,3,this);
+//    QTableView activitiesTableView;
+    model->setHorizontalHeaderItem(0, new QStandardItem(QString("Column 1")));
+    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Column 2")));
+    model->setHorizontalHeaderItem(2, new QStandardItem(QString("Column 3")));
 
-    ActivitiesDelegate delegate;
-    activitiesTableView.setItemDelegate(&delegate);
+    ui->activitiesTableView->setModel(model);
+    ui->activitiesTableView->show();
 
-    activitiesTableView.horizontalHeader()->setStretchLastSection(true);
-    activitiesTableView.show();
+    connect(ui->activitiesTableView, SIGNAL(cellClicked(int, int)), this, SLOT(activityClicked(int, int)));
+
 }
+
+void MainWindow::activityClicked(int row, int col)
+{
+    ui->activitiesTableView->setGridStyle(Qt::DashDotLine);
+
+    ui->actionNameLabel->setText("AAAAAAAAAAAAAAA");
+
+//    QStandardItem item;
+//    item.setData(QColor(Qt::green), Qt::BackgroundRole);
+//    item.setData(QColor(Qt::red), Qt::FontRole);
+}
+
 
 MainWindow::~MainWindow()
 {
@@ -55,4 +69,9 @@ void MainWindow::on_HistoryButton_2_clicked()
 void MainWindow::on_GraphsButton_2_clicked()
 {
     ui->timeStackedWidget->setCurrentIndex(2);
+}
+
+void MainWindow::on_activitiesTableView_clicked(const QModelIndex &index)
+{
+
 }

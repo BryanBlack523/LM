@@ -13,18 +13,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mwStackedWidget->setCurrentIndex(0);
 
     tableModel = new QStandardItemModel(2,3,this);
-//    QTableView activitiesTableView;
+
     tableModel->setHorizontalHeaderItem(0, new QStandardItem(QString("Column 1")));
     tableModel->setHorizontalHeaderItem(1, new QStandardItem(QString("Column 2")));
     tableModel->setHorizontalHeaderItem(2, new QStandardItem(QString("Column 3")));
     tableModel->setData (tableModel->index(0,0), 523);
 
     ui->activitiesTableView->setModel(tableModel);
-    ui->activitiesTableView->show();
+//    ui->activitiesTableView->show();
 
     listModel = new QStandardItemModel(this);
 
-    connect(ui->activitiesTableView, SIGNAL(pressed(const QmodelIndex &)), ui->currentActivitiesListView, SLOT(on_activityClicked(const QModelIndex tableModel.index)));
+    connect(ui->activitiesTableView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_activityClicked(const QModelIndex&)));
 
 }
 
@@ -36,7 +36,7 @@ void MainWindow::on_activityClicked(const QModelIndex &index)
 
     listModel->appendRow(new QStandardItem(QString(cellText)));
     ui->currentActivitiesListView->setModel(listModel);
-    ui->currentActivitiesListView->show();
+//    ui->currentActivitiesListView->show();
 }
 
 

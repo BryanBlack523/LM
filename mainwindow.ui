@@ -83,40 +83,23 @@
              <string notr="true">background-color: rgb(170, 255, 0);</string>
             </property>
             <widget class="QWidget" name="presentTimePage">
-             <widget class="QTableView" name="activitiesTableView">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>70</y>
-                <width>451</width>
-                <height>411</height>
-               </rect>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">background-color: rgb(255, 255, 255);</string>
-              </property>
-             </widget>
-             <widget class="QWidget" name="horizontalLayoutWidget_2">
+             <widget class="QWidget" name="">
               <property name="geometry">
                <rect>
                 <x>0</x>
                 <y>0</y>
                 <width>451</width>
-                <height>71</height>
+                <height>481</height>
                </rect>
               </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <layout class="QVBoxLayout" name="verticalLayout_3">
                <item>
-                <widget class="QLabel" name="actionNameLabel">
-                 <property name="text">
-                  <string>ActionName</string>
-                 </property>
-                </widget>
+                <widget class="QListView" name="currentActivitiesListView"/>
                </item>
                <item>
-                <widget class="QLabel" name="actionTimeLabel">
-                 <property name="text">
-                  <string>ActionTime</string>
+                <widget class="QTableView" name="activitiesTableView">
+                 <property name="styleSheet">
+                  <string notr="true">background-color: rgb(255, 255, 255);</string>
                  </property>
                 </widget>
                </item>
@@ -234,7 +217,7 @@ alternate-background-color: rgb(148, 140, 49);</string>
      <x>0</x>
      <y>0</y>
      <width>450</width>
-     <height>20</height>
+     <height>18</height>
     </rect>
    </property>
   </widget>

@@ -3,6 +3,7 @@
 #include <QStandardItemModel>
 #include <QTableView>
 #include <QStandardItem>
+#include <QString>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -11,28 +12,31 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->mwStackedWidget->setCurrentIndex(0);
 
-    QStandardItemModel *model = new QStandardItemModel(2,3,this);
+    tableModel = new QStandardItemModel(2,3,this);
 //    QTableView activitiesTableView;
-    model->setHorizontalHeaderItem(0, new QStandardItem(QString("Column 1")));
-    model->setHorizontalHeaderItem(1, new QStandardItem(QString("Column 2")));
-    model->setHorizontalHeaderItem(2, new QStandardItem(QString("Column 3")));
+    tableModel->setHorizontalHeaderItem(0, new QStandardItem(QString("Column 1")));
+    tableModel->setHorizontalHeaderItem(1, new QStandardItem(QString("Column 2")));
+    tableModel->setHorizontalHeaderItem(2, new QStandardItem(QString("Column 3")));
+    tableModel->setData (tableModel->index(0,0), 523);
 
-    ui->activitiesTableView->setModel(model);
+    ui->activitiesTableView->setModel(tableModel);
     ui->activitiesTableView->show();
 
-    connect(ui->activitiesTableView, SIGNAL(cellClicked(int, int)), this, SLOT(activityClicked(int, int)));
+    listModel = new QStandardItemModel(this);
+
+    connect(ui->activitiesTableView, SIGNAL(pressed(const QmodelIndex &)), ui->currentActivitiesListView, SLOT(on_activityClicked(const QModelIndex tableModel.index)));
 
 }
 
-void MainWindow::activityClicked(int row, int col)
+void MainWindow::on_activityClicked(const QModelIndex &index)
 {
-    ui->activitiesTableView->setGridStyle(Qt::DashDotLine);
+//    ui->activitiesTableView->setGridStyle(Qt::DashDotLine);
 
-    ui->actionNameLabel->setText("AAAAAAAAAAAAAAA");
+    QString cellText = ui->activitiesTableView->model()->data(index).toString();
 
-//    QStandardItem item;
-//    item.setData(QColor(Qt::green), Qt::BackgroundRole);
-//    item.setData(QColor(Qt::red), Qt::FontRole);
+    listModel->appendRow(new QStandardItem(QString(cellText)));
+    ui->currentActivitiesListView->setModel(listModel);
+    ui->currentActivitiesListView->show();
 }
 
 

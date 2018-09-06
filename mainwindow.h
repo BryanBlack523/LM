@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStandardItemModel>
 
 namespace Ui {
 class MainWindow;
@@ -17,7 +18,7 @@ public:
 
 private slots:
 
-    void activityClicked(int row, int col);
+    void on_activityClicked(const QModelIndex &);
 
     void on_TimeButton_clicked();
 
@@ -35,6 +36,9 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+
+    QStandardItemModel *tableModel;
+    QStandardItemModel *listModel;
 };
 
 #endif // MAINWINDOW_H

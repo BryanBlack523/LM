@@ -20,7 +20,6 @@ MainWindow::MainWindow(QWidget *parent) :
     tableModel->setData (tableModel->index(0,0), 523);
 
     ui->activitiesTableView->setModel(tableModel);
-//    ui->activitiesTableView->show();
 
     listModel = new QStandardItemModel(this);
 
@@ -30,15 +29,44 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::on_activityClicked(const QModelIndex &index)
 {
-//    ui->activitiesTableView->setGridStyle(Qt::DashDotLine);
-
     QString cellText = ui->activitiesTableView->model()->data(index).toString();
 
-    listModel->appendRow(new QStandardItem(QString(cellText)));
-    ui->currentActivitiesListView->setModel(listModel);
-//    ui->currentActivitiesListView->show();
+    if (checkActivityExist(cellText,index))
+    {
+
+    }
+    else
+    {
+        listModel->appendRow(new QStandardItem(QString(cellText)));
+        QModelIndex listIndex = listModel->indexFromItem(new QStandardItem(QString(cellText)));
+
+        activities.append(Activity(cellText,index,listIndex));
+
+        ui->currentActivitiesListView->setModel(listModel);
+    }
 }
 
+bool MainWindow::checkActivityExist(const QString &name, const QModelIndex &tableIdx)
+{
+    for (int i = 0; i < activities.size(); ++i)
+    {
+        if (activities[i].getName() == name && activities[i].getTableIndex() == tableIdx)
+            return true;
+    }
+    return false;
+}
+
+QModelIndex MainWindow::getIdxActivityFromVector(const QString &name,const QModelIndex &tableIdx)
+{
+    for (int i = 0; i < activities.size(); ++i)
+    {
+        if (activities[i].getName() == name && activities[i].getTableIndex() == tableIdx)
+            return activities[i].getListIndex();
+        else
+            if (i = activities.size())
+
+    }
+}
 
 MainWindow::~MainWindow()
 {
@@ -73,9 +101,4 @@ void MainWindow::on_HistoryButton_2_clicked()
 void MainWindow::on_GraphsButton_2_clicked()
 {
     ui->timeStackedWidget->setCurrentIndex(2);
-}
-
-void MainWindow::on_activitiesTableView_clicked(const QModelIndex &index)
-{
-
 }

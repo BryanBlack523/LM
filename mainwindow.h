@@ -1,8 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "activity.h"
 #include <QMainWindow>
 #include <QStandardItemModel>
+#include <QVector>
 
 namespace Ui {
 class MainWindow;
@@ -32,13 +34,17 @@ private slots:
 
     void on_HistoryButton_2_clicked();
 
-    void on_activitiesTableView_clicked(const QModelIndex &index);
-
 private:
     Ui::MainWindow *ui;
 
     QStandardItemModel *tableModel;
     QStandardItemModel *listModel;
+
+    QVector<Activity> activities;
+
+    bool checkActivityExist(const QString&,const QModelIndex&);
+
+    QModelIndex getIdxActivityFromVector(const QString&,const QModelIndex&);
 };
 
 #endif // MAINWINDOW_H

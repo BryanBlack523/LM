@@ -4,6 +4,7 @@
 #include <QTableView>
 #include <QStandardItem>
 #include <QString>
+#include <QErrorMessage>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -63,7 +64,12 @@ QModelIndex MainWindow::getIdxActivityFromVector(const QString &name,const QMode
         if (activities[i].getName() == name && activities[i].getTableIndex() == tableIdx)
             return activities[i].getListIndex();
         else
-            if (i = activities.size())
+            if (i == activities.size() - 1)
+            {
+                QErrorMessage msg(this);
+
+                msg.showMessage("Could not find Activity " + name + " in CurrentActivitiesList");
+            }
 
     }
 }

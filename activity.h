@@ -8,6 +8,7 @@ class Activity
 {
 public:
     Activity(const QString &,const QModelIndex &,const QModelIndex &listIndex);
+//    Activity();
     ~Activity();
 
     QString getName();

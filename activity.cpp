@@ -8,6 +8,8 @@ Activity::Activity(const QString &name, const QModelIndex &tableIndex, const QMo
     m_listIdx = listIndex;
 }
 
+//Activity::Activity(){}
+
 Activity::~Activity()
 {
 

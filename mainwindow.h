@@ -4,7 +4,7 @@
 #include "activity.h"
 #include <QMainWindow>
 #include <QStandardItemModel>
-#include <QVector>
+#include <QList>
 
 namespace Ui {
 class MainWindow;
@@ -40,11 +40,13 @@ private:
     QStandardItemModel *tableModel;
     QStandardItemModel *listModel;
 
-    QVector<Activity> activities;
+    QList<Activity> activities;
 
     bool checkActivityExist(const QString&,const QModelIndex&);
 
-    QModelIndex getIdxActivityFromVector(const QString&,const QModelIndex&);
+    QModelIndex getIdxActivityFromContainer(const QString&,const QModelIndex&);
+
+    void mockTable();
 };
 
 #endif // MAINWINDOW_H

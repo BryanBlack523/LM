@@ -5,22 +5,16 @@
 #include <QStandardItem>
 #include <QString>
 #include <QErrorMessage>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->mwStackedWidget->setCurrentIndex(0);
+    ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
-    tableModel = new QStandardItemModel(2,3,this);
-
-    tableModel->setHorizontalHeaderItem(0, new QStandardItem(QString("Column 1")));
-    tableModel->setHorizontalHeaderItem(1, new QStandardItem(QString("Column 2")));
-    tableModel->setHorizontalHeaderItem(2, new QStandardItem(QString("Column 3")));
-    tableModel->setData (tableModel->index(0,0), 523);
-
-    ui->activitiesTableView->setModel(tableModel);
+    mockTable();
 
     listModel = new QStandardItemModel(this);
 
@@ -28,22 +22,38 @@ MainWindow::MainWindow(QWidget *parent) :
 
 }
 
-void MainWindow::on_activityClicked(const QModelIndex &index)
+void MainWindow::on_activityClicked(const QModelIndex &tableIndex)
 {
-    QString cellText = ui->activitiesTableView->model()->data(index).toString();
+    QString cellText = ui->activitiesTableView->model()->data(tableIndex).toString();
 
-    if (checkActivityExist(cellText,index))
-    {
-
-    }
-    else
+    if (!checkActivityExist(cellText,tableIndex))//if not pressed - add
     {
         listModel->appendRow(new QStandardItem(QString(cellText)));
-        QModelIndex listIndex = listModel->indexFromItem(new QStandardItem(QString(cellText)));
 
-        activities.append(Activity(cellText,index,listIndex));
+        int rowCount = listModel->rowCount(QModelIndex());
+
+        QModelIndex listIndex = listModel->index(rowCount - 1, 0, QModelIndex());
+
+
+        qDebug() << "Added value: " << cellText << " at x: " << listIndex.row() << " y: " << listIndex.column();
+
+        activities.append(Activity(cellText,tableIndex,listIndex));
 
         ui->currentActivitiesListView->setModel(listModel);
+    }
+    else//else delete
+    {
+        QModelIndex m_list = getIdxActivityFromContainer(cellText,tableIndex);
+
+        qDebug() << "Deleting value: " << cellText << " at x: " << m_list.row() << " y: " << m_list.column();
+
+        listModel->removeRow(m_list.row());
+
+        for (int i = 0; i < activities.size(); ++i)
+        {
+            if (activities[i].getName() == cellText && activities[i].getTableIndex() == tableIndex)
+                activities.removeAt(i);
+        }
     }
 }
 
@@ -57,13 +67,13 @@ bool MainWindow::checkActivityExist(const QString &name, const QModelIndex &tabl
     return false;
 }
 
-QModelIndex MainWindow::getIdxActivityFromVector(const QString &name,const QModelIndex &tableIdx)
+QModelIndex MainWindow::getIdxActivityFromContainer(const QString &name,const QModelIndex &tableIdx)
 {
     for (int i = 0; i < activities.size(); ++i)
     {
         if (activities[i].getName() == name && activities[i].getTableIndex() == tableIdx)
-            return activities[i].getListIndex();
-        else
+            return activities[i].getListIndex();// if exist return one
+        else                                    //else throw error message
             if (i == activities.size() - 1)
             {
                 QErrorMessage msg(this);
@@ -74,6 +84,24 @@ QModelIndex MainWindow::getIdxActivityFromVector(const QString &name,const QMode
     }
 }
 
+void MainWindow::mockTable()
+{
+    tableModel = new QStandardItemModel(2,3,this);
+
+    tableModel->setHorizontalHeaderItem(0, new QStandardItem(QString("Column 1")));
+    tableModel->setHorizontalHeaderItem(1, new QStandardItem(QString("Column 2")));
+    tableModel->setHorizontalHeaderItem(2, new QStandardItem(QString("Column 3")));
+
+    tableModel->setData (tableModel->index(0,0), "1 row, 1 col");
+    tableModel->setData (tableModel->index(0,1), "1 row, 2 col");
+    tableModel->setData (tableModel->index(0,2), "1 row, 3 col");
+    tableModel->setData (tableModel->index(1,0), "2 row, 1 col");
+    tableModel->setData (tableModel->index(1,1), "2 row, 2 col");
+    tableModel->setData (tableModel->index(1,2), "2 row, 3 col");
+
+    ui->activitiesTableView->setModel(tableModel);
+}
+
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -81,30 +109,30 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_TimeButton_clicked()
 {
-    ui->mwStackedWidget->setCurrentIndex(0);
+    ui->mwStackedWidget->setCurrentIndex(0);//open timePage
 }
 
 void MainWindow::on_PlansButton_clicked()
 {
-    ui->mwStackedWidget->setCurrentIndex(1);
+    ui->mwStackedWidget->setCurrentIndex(1);//open plansPage
 }
 
 void MainWindow::on_FinancesButton_clicked()
 {
-    ui->mwStackedWidget->setCurrentIndex(2);
+    ui->mwStackedWidget->setCurrentIndex(2);//open financesPage
 }
 
 void MainWindow::on_PresentButton_2_clicked()
 {
-    ui->timeStackedWidget->setCurrentIndex(0);
+    ui->timeStackedWidget->setCurrentIndex(0);//open timePage.presentPage
 }
 
 void MainWindow::on_HistoryButton_2_clicked()
 {
-    ui->timeStackedWidget->setCurrentIndex(1);
+    ui->timeStackedWidget->setCurrentIndex(1);//open timePage.historyPage
 }
 
 void MainWindow::on_GraphsButton_2_clicked()
 {
-    ui->timeStackedWidget->setCurrentIndex(2);
+    ui->timeStackedWidget->setCurrentIndex(2);//open timePage.graphsPage
 }

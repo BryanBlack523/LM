@@ -26,7 +26,8 @@ void MainWindow::on_activityClicked(const QModelIndex &tableIndex)
 {
     QString cellText = ui->activitiesTableView->model()->data(tableIndex).toString();
 
-    if (!checkActivityExist(cellText,tableIndex))//if not pressed - add
+    qDebug() << cellText;
+    if (!checkActivityExist(cellText))//if not pressed - add
     {
         listModel->appendRow(new QStandardItem(QString(cellText)));
 
@@ -34,34 +35,42 @@ void MainWindow::on_activityClicked(const QModelIndex &tableIndex)
 
         QModelIndex listIndex = listModel->index(rowCount - 1, 0, QModelIndex());
 
+        activities.append(Activity(cellText));
 
-        qDebug() << "Added value: " << cellText << " at x: " << listIndex.row() << " y: " << listIndex.column();
-
-        activities.append(Activity(cellText,tableIndex,listIndex));
+        qDebug() << "Added value:\t" << cellText << " at x: " << listIndex.row() << " L|C " << rowCount << "|" << activities.size();
 
         ui->currentActivitiesListView->setModel(listModel);
     }
     else//else delete
     {
-        QModelIndex m_list = getIdxActivityFromContainer(cellText,tableIndex);
-
-        qDebug() << "Deleting value: " << cellText << " at x: " << m_list.row() << " y: " << m_list.column();
-
-        listModel->removeRow(m_list.row());
-
-        for (int i = 0; i < activities.size(); ++i)
+        int rowCount = listModel->rowCount(QModelIndex());
+        qDebug() << "rows " << rowCount;
+        for (int i = 0; i < rowCount; ++i)
         {
-            if (activities[i].getName() == cellText && activities[i].getTableIndex() == tableIndex)
-                activities.removeAt(i);
+            QModelIndex listIndex = listModel->index(i, 0, QModelIndex());
+
+            qDebug() << i << " " << listModel->itemData(listIndex).value(0).toString().contains(cellText) << " Data:" << listModel->itemData(listIndex).value(0);
+
+            if(listModel->itemData(listIndex).value(0).toString().contains(cellText))
+            {
+                qDebug() << "Deleting value:\t" << cellText << " at x: " << listIndex.row() << " L|C " << listModel->rowCount(QModelIndex()) << "|" << activities.size();
+                listModel->removeRows(i, 1, QModelIndex());
+
+                for (int i = 0; i < activities.size(); ++i)
+                {
+                    if (activities[i].getName() == cellText)
+                        activities.removeAt(i);
+                }
+            }
         }
     }
 }
 
-bool MainWindow::checkActivityExist(const QString &name, const QModelIndex &tableIdx)
+bool MainWindow::checkActivityExist(const QString &name)
 {
     for (int i = 0; i < activities.size(); ++i)
     {
-        if (activities[i].getName() == name && activities[i].getTableIndex() == tableIdx)
+        if (activities[i].getName() == name)
             return true;
     }
     return false;
@@ -92,12 +101,12 @@ void MainWindow::mockTable()
     tableModel->setHorizontalHeaderItem(1, new QStandardItem(QString("Column 2")));
     tableModel->setHorizontalHeaderItem(2, new QStandardItem(QString("Column 3")));
 
-    tableModel->setData (tableModel->index(0,0), "1 row, 1 col");
-    tableModel->setData (tableModel->index(0,1), "1 row, 2 col");
-    tableModel->setData (tableModel->index(0,2), "1 row, 3 col");
-    tableModel->setData (tableModel->index(1,0), "2 row, 1 col");
-    tableModel->setData (tableModel->index(1,1), "2 row, 2 col");
-    tableModel->setData (tableModel->index(1,2), "2 row, 3 col");
+    tableModel->setData (tableModel->index(0,0), "cat");
+    tableModel->setData (tableModel->index(0,1), "dog");
+    tableModel->setData (tableModel->index(0,2), "par");
+    tableModel->setData (tableModel->index(1,0), "cat2");
+    tableModel->setData (tableModel->index(1,1), "dog2");
+    tableModel->setData (tableModel->index(1,2), "par2");
 
     ui->activitiesTableView->setModel(tableModel);
 }
@@ -135,4 +144,23 @@ void MainWindow::on_HistoryButton_2_clicked()
 void MainWindow::on_GraphsButton_2_clicked()
 {
     ui->timeStackedWidget->setCurrentIndex(2);//open timePage.graphsPage
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    qDebug() << "Here's what i got:\n";
+    qDebug() << "Items in LIST:";
+    int rowCount = listModel->rowCount(QModelIndex());
+
+    for (int i = 0; i < rowCount; ++i)
+    {
+        QModelIndex listIndex = listModel->index(i, 0, QModelIndex());
+        qDebug() << "List : " << listIndex.row() << ": " << listModel->itemData(listIndex);
+    }
+
+    qDebug() << "\nItems in CONTAINER:";
+    for (int i =0; i < activities.size(); ++i)
+    {
+        qDebug() << activities[i].getName() << " list: " << activities[i].getListIndex().row() << " list col: " << activities[i].getListIndex().column() << " table x:" << activities[i].getTableIndex().row() << " y:" << activities[i].getTableIndex().column();
+    }
 }

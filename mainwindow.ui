@@ -80,10 +80,10 @@
           <item>
            <widget class="QStackedWidget" name="timeStackedWidget">
             <property name="styleSheet">
-             <string notr="true">background-color: rgb(170, 255, 0);</string>
+             <string notr="true"/>
             </property>
             <widget class="QWidget" name="presentTimePage">
-             <widget class="QWidget" name="">
+             <widget class="QWidget" name="layoutWidget">
               <property name="geometry">
                <rect>
                 <x>0</x>
@@ -94,7 +94,18 @@
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">
                <item>
-                <widget class="QListView" name="currentActivitiesListView"/>
+                <widget class="QListView" name="currentActivitiesListView">
+                 <property name="styleSheet">
+                  <string notr="true">background-color: rgb(255, 255, 255);</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton">
+                 <property name="text">
+                  <string>GetData</string>
+                 </property>
+                </widget>
                </item>
                <item>
                 <widget class="QTableView" name="activitiesTableView">

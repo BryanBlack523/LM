@@ -34,6 +34,8 @@ private slots:
 
     void on_HistoryButton_2_clicked();
 
+    void on_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -42,7 +44,7 @@ private:
 
     QList<Activity> activities;
 
-    bool checkActivityExist(const QString&,const QModelIndex&);
+    bool checkActivityExist(const QString&);
 
     QModelIndex getIdxActivityFromContainer(const QString&,const QModelIndex&);
 

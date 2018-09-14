@@ -1,36 +1,32 @@
 #include "activity.h"
+#include <QDebug>
 
 
-Activity::Activity(const QString &name, const QModelIndex &tableIndex, const QModelIndex &listIndex)
-{
-    m_name = name;
-    m_tableIdx = tableIndex;
-    m_listIdx = listIndex;
-}
 
 Activity::Activity(const QString &name)
 {
     m_name = name;
+    timer.start();
+    QDateTime date;
+    beginDate = date.currentDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz");
 }
-
-//Activity::Activity(){}
 
 Activity::~Activity()
 {
-
-}
-
-QModelIndex Activity::getListIndex()
-{
-    return m_listIdx;
-}
-
-QModelIndex Activity::getTableIndex()
-{
-    return m_tableIdx;
+    qDebug() << "Activity: " << m_name << " started " << beginDate << " elapsed " << timer.elapsed();
 }
 
 QString Activity::getName()
 {
     return m_name;
+}
+
+QDateTime Activity::getBeginDate()
+{
+    return QDateTime::fromString(beginDate, "yyyy-MM-dd HH:mm:ss.zzz");
+}
+
+qint64 Activity::getElapsedTime()
+{
+    return timer.elapsed();
 }

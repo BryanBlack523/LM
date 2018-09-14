@@ -2,23 +2,24 @@
 #define ACTIVITY_H
 
 #include <QString>
-#include <QModelIndex>
+#include <QDateTime>
+#include <QElapsedTimer>
 
 class Activity
 {
 public:
-    Activity(const QString &,const QModelIndex &,const QModelIndex &listIndex);
     Activity(const QString &);
     ~Activity();
 
     QString getName();
-    QModelIndex getTableIndex();
-    QModelIndex getListIndex();
+    QDateTime getBeginDate();
+    qint64 getElapsedTime();
+
 
 private:
     QString m_name;
-    QModelIndex m_tableIdx;
-    QModelIndex m_listIdx;
+    QString beginDate;
+    QElapsedTimer timer;
 
 };
 

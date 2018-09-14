@@ -26,43 +26,19 @@ void MainWindow::on_activityClicked(const QModelIndex &tableIndex)
 {
     QString cellText = ui->activitiesTableView->model()->data(tableIndex).toString();
 
-    qDebug() << cellText;
     if (!checkActivityExist(cellText))//if not pressed - add
     {
         listModel->appendRow(new QStandardItem(QString(cellText)));
 
-        int rowCount = listModel->rowCount(QModelIndex());
-
-        QModelIndex listIndex = listModel->index(rowCount - 1, 0, QModelIndex());
-
         activities.append(Activity(cellText));
 
-        qDebug() << "Added value:\t" << cellText << " at x: " << listIndex.row() << " L|C " << rowCount << "|" << activities.size();
+//        qDebug() << "Added value:\t" << cellText << " at x: " << listIndex.row() << " L|C " << rowCount << "|" << activities.size();
 
         ui->currentActivitiesListView->setModel(listModel);
     }
     else//else delete
     {
-        int rowCount = listModel->rowCount(QModelIndex());
-        qDebug() << "rows " << rowCount;
-        for (int i = 0; i < rowCount; ++i)
-        {
-            QModelIndex listIndex = listModel->index(i, 0, QModelIndex());
-
-            qDebug() << i << " " << listModel->itemData(listIndex).value(0).toString().contains(cellText) << " Data:" << listModel->itemData(listIndex).value(0);
-
-            if(listModel->itemData(listIndex).value(0).toString().contains(cellText))
-            {
-                qDebug() << "Deleting value:\t" << cellText << " at x: " << listIndex.row() << " L|C " << listModel->rowCount(QModelIndex()) << "|" << activities.size();
-                listModel->removeRows(i, 1, QModelIndex());
-
-                for (int i = 0; i < activities.size(); ++i)
-                {
-                    if (activities[i].getName() == cellText)
-                        activities.removeAt(i);
-                }
-            }
-        }
+        deleteActivity(cellText);
     }
 }
 
@@ -76,20 +52,31 @@ bool MainWindow::checkActivityExist(const QString &name)
     return false;
 }
 
-QModelIndex MainWindow::getIdxActivityFromContainer(const QString &name,const QModelIndex &tableIdx)
+void MainWindow::deleteActivity(const QString &cellText)
 {
-    for (int i = 0; i < activities.size(); ++i)
+    int rowCount = listModel->rowCount(QModelIndex());
+
+    QRegularExpression reg("^" + cellText + "$");//exactly the right word
+
+    for (int i = 0; i < rowCount; ++i)
     {
-        if (activities[i].getName() == name && activities[i].getTableIndex() == tableIdx)
-            return activities[i].getListIndex();// if exist return one
-        else                                    //else throw error message
-            if (i == activities.size() - 1)
+        QModelIndex listIndex = listModel->index(i, 0, QModelIndex());
+
+        QRegularExpressionMatch match = reg.match(listModel->itemData(listIndex).value(0).toString());
+
+//            qDebug() << i << " " << listModel->itemData(listIndex).value(0).toString().contains(cellText) << " Data:" << listModel->itemData(listIndex).value(0);
+
+        if(match.hasMatch())
+        {
+//                qDebug() << "Deleting value:\t" << cellText << " at x: " << listIndex.row() << " L|C " << listModel->rowCount(QModelIndex()) << "|" << activities.size();
+            listModel->removeRows(i, 1, QModelIndex());
+
+            for (int i = 0; i < activities.size(); ++i)
             {
-                QErrorMessage msg(this);
-
-                msg.showMessage("Could not find Activity " + name + " in CurrentActivitiesList");
+                if (activities[i].getName() == cellText)
+                    activities.removeAt(i);
             }
-
+        }
     }
 }
 
@@ -161,6 +148,6 @@ void MainWindow::on_pushButton_clicked()
     qDebug() << "\nItems in CONTAINER:";
     for (int i =0; i < activities.size(); ++i)
     {
-        qDebug() << activities[i].getName() << " list: " << activities[i].getListIndex().row() << " list col: " << activities[i].getListIndex().column() << " table x:" << activities[i].getTableIndex().row() << " y:" << activities[i].getTableIndex().column();
+        qDebug() << activities[i].getName();
     }
 }

@@ -48,6 +48,8 @@ private:
 
     QModelIndex getIdxActivityFromContainer(const QString&,const QModelIndex&);
 
+    void deleteActivity (const QString&);
+
     void mockTable();
 };
 

@@ -18,29 +18,33 @@ MainWindow::MainWindow(QWidget *parent) :
 
     listModel = new QStandardItemModel(this);
 
-    connect(ui->activitiesTableView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_activityClicked(const QModelIndex&)));
+    connect(ui->activitiesTableView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_tableActivityClicked(const QModelIndex&)));
+    connect(ui->currentActivitiesListView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_listActivityClicked(const QModelIndex&)));
 
 }
 
-void MainWindow::on_activityClicked(const QModelIndex &tableIndex)
+void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
 {
     QString cellText = ui->activitiesTableView->model()->data(tableIndex).toString();
 
     if (!checkActivityExist(cellText))//if not pressed - add
     {
-        listModel->appendRow(new QStandardItem(QString(cellText)));
-
-        activities.append(Activity(cellText));
-
-//        qDebug() << "Added value:\t" << cellText << " at x: " << listIndex.row() << " L|C " << rowCount << "|" << activities.size();
-
-        ui->currentActivitiesListView->setModel(listModel);
+        addActivity(cellText);
     }
     else//else delete
     {
         deleteActivity(cellText);
     }
 }
+
+void MainWindow::on_listActivityClicked(const QModelIndex &listIndex)
+{
+    QString cellText = ui->currentActivitiesListView->model()->data(listIndex).toString();
+
+    deleteActivity(cellText);
+}
+
+
 
 bool MainWindow::checkActivityExist(const QString &name)
 {
@@ -78,6 +82,17 @@ void MainWindow::deleteActivity(const QString &cellText)
             }
         }
     }
+}
+
+void MainWindow::addActivity(const QString &cellText)
+{
+    listModel->appendRow(new QStandardItem(QString(cellText)));
+
+    activities.append(Activity(cellText));
+
+//        qDebug() << "Added value:\t" << cellText << " at x: " << listIndex.row() << " L|C " << rowCount << "|" << activities.size();
+
+    ui->currentActivitiesListView->setModel(listModel);
 }
 
 void MainWindow::mockTable()

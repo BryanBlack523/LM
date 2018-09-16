@@ -13,7 +13,10 @@ Activity::Activity(const QString &name)
 
 Activity::~Activity()
 {
-    qDebug() << "Activity: " << m_name << " started " << beginDate << " elapsed " << timer.elapsed();
+    if (timeIsValid())
+        qDebug() << "Activity: " << m_name << " started " << beginDate << " elapsed " << timer.elapsed();
+    else
+        qDebug() << "Activity is not valid: " << m_name << " started " << beginDate << " elapsed " << timer.elapsed();
 }
 
 QString Activity::getName()
@@ -29,4 +32,12 @@ QDateTime Activity::getBeginDate()
 qint64 Activity::getElapsedTime()
 {
     return timer.elapsed();
+}
+
+bool Activity::timeIsValid()
+{
+    if (timer.elapsed() < 30000) //30s
+        return false;
+    else
+        return true;
 }

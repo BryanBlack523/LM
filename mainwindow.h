@@ -20,7 +20,8 @@ public:
 
 private slots:
 
-    void on_activityClicked(const QModelIndex &);
+    void on_tableActivityClicked(const QModelIndex &);
+    void on_listActivityClicked(const QModelIndex &);
 
     void on_TimeButton_clicked();
 
@@ -49,6 +50,7 @@ private:
     QModelIndex getIdxActivityFromContainer(const QString&,const QModelIndex&);
 
     void deleteActivity (const QString&);
+    void addActivity (const QString&);
 
     void mockTable();
 };

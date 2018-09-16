@@ -17,6 +17,8 @@ public:
 
 
 private:
+    bool timeIsValid();
+
     QString m_name;
     QString beginDate;
     QElapsedTimer timer;

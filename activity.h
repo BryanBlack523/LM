@@ -11,16 +11,16 @@ public:
     Activity(const QString &);
     ~Activity();
 
-    QString getName();
-    QDateTime getBeginDate();
-    qint64 getElapsedTime();
+    QString getName() const;
+    QDateTime getBeginDate() const;
+    qint64 getElapsedTime() const;
 
 
 private:
-    bool timeIsValid();
+    bool timeIsValid() const;
 
     QString m_name;
-    QString beginDate;
+    QDateTime beginDate;
     QElapsedTimer timer;
 
 };

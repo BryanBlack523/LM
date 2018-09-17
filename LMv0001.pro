@@ -27,12 +27,12 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     activity.cpp \
-    labelddelegate.cpp
+    activitylistdelegate.cpp
 
 HEADERS += \
         mainwindow.h \
     activity.h \
-    labelddelegate.h
+    activitylistdelegate.h
 
 FORMS += \
         mainwindow.ui

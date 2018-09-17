@@ -7,37 +7,30 @@ Activity::Activity(const QString &name)
 {
     m_name = name;
     timer.start();
-    QDateTime date;
-    beginDate = date.currentDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz");
+    beginDate = QDateTime::currentDateTime();
 }
 
 Activity::~Activity()
 {
     if (timeIsValid())
-        qDebug() << "Activity: " << m_name << " started " << beginDate << " elapsed " << timer.elapsed();
+        qDebug() << "Activity: " << m_name << " started " << beginDate.toString("yyyy-MM-dd HH:mm:ss.zzz") << " elapsed " << timer.elapsed();
     else
-        qDebug() << "Activity is not valid: " << m_name << " started " << beginDate << " elapsed " << timer.elapsed();
+        qDebug() << "Activity is not valid: " << m_name << " started " << beginDate.toString("yyyy-MM-dd HH:mm:ss.zzz") << " elapsed " << timer.elapsed();
 }
 
-QString Activity::getName()
+QString Activity::getName() const
 {
     return m_name;
 }
 
-QDateTime Activity::getBeginDate()
+QDateTime Activity::getBeginDate() const
 {
-    return QDateTime::fromString(beginDate, "yyyy-MM-dd HH:mm:ss.zzz");
+    return beginDate;
 }
 
-qint64 Activity::getElapsedTime()
+qint64 Activity::getElapsedTime() const
 {
     return timer.elapsed();
 }
 
-bool Activity::timeIsValid()
-{
-    if (timer.elapsed() < 30000) //30s
-        return false;
-    else
-        return true;
-}
+bool Activity::timeIsValid() const { return timer.elapsed() >= 30000; } //30s

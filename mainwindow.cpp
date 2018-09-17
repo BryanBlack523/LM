@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "activitylistdelegate.h"
 #include <QStandardItemModel>
 #include <QTableView>
 #include <QStandardItem>
@@ -14,9 +15,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
-    mockTable();
+    fillTable();
 
     listModel = new QStandardItemModel(this);
+    ActivityListDelegate *del = new ActivityListDelegate(this);
+    ui->currentActivitiesListView->setItemDelegate(del);
 
     connect(ui->activitiesTableView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_tableActivityClicked(const QModelIndex&)));
     connect(ui->currentActivitiesListView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_listActivityClicked(const QModelIndex&)));
@@ -27,7 +30,7 @@ void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
 {
     QString cellText = ui->activitiesTableView->model()->data(tableIndex).toString();
 
-    if (!checkActivityExist(cellText))//if not pressed - add
+    if (!hasActivity(cellText))//if not pressed - add
     {
         addActivity(cellText);
     }
@@ -46,7 +49,7 @@ void MainWindow::on_listActivityClicked(const QModelIndex &listIndex)
 
 
 
-bool MainWindow::checkActivityExist(const QString &name)
+bool MainWindow::hasActivity(const QString &name) const
 {
     for (int i = 0; i < activities.size(); ++i)
     {
@@ -58,7 +61,7 @@ bool MainWindow::checkActivityExist(const QString &name)
 
 void MainWindow::deleteActivity(const QString &cellText)
 {
-    int rowCount = listModel->rowCount(QModelIndex());
+    int rowCount = listModel->rowCount();
 
     QRegularExpression reg("^" + cellText + "$");//exactly the right word
 
@@ -95,7 +98,7 @@ void MainWindow::addActivity(const QString &cellText)
     ui->currentActivitiesListView->setModel(listModel);
 }
 
-void MainWindow::mockTable()
+void MainWindow::fillTable()
 {
     tableModel = new QStandardItemModel(2,3,this);
 
@@ -148,7 +151,7 @@ void MainWindow::on_GraphsButton_2_clicked()
     ui->timeStackedWidget->setCurrentIndex(2);//open timePage.graphsPage
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_debugButton_clicked()
 {
     qDebug() << "Here's what i got:\n";
     qDebug() << "Items in LIST:";

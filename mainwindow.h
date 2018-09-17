@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include "activity.h"
 #include <QMainWindow>
@@ -35,7 +34,7 @@ private slots:
 
     void on_HistoryButton_2_clicked();
 
-    void on_pushButton_clicked();
+    void on_debugButton_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -45,14 +44,12 @@ private:
 
     QList<Activity> activities;
 
-    bool checkActivityExist(const QString&);
+    bool hasActivity(const QString&) const;
 
     QModelIndex getIdxActivityFromContainer(const QString&,const QModelIndex&);
 
-    void deleteActivity (const QString&);
-    void addActivity (const QString&);
+    void deleteActivity(const QString&);
+    void addActivity(const QString&);
 
-    void mockTable();
+    void fillTable();
 };
-
-#endif // MAINWINDOW_H

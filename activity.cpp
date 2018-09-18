@@ -3,11 +3,9 @@
 
 
 
-Activity::Activity(const QString &name)
+Activity::Activity(const QString &name) : m_name(name), beginDate(QDateTime::currentDateTime())
 {
-    m_name = name;
     timer.start();
-    beginDate = QDateTime::currentDateTime();
 }
 
 Activity::~Activity()

@@ -1,6 +1,7 @@
 #ifndef ACTIVITYLISTDELEGATE_H
 #define ACTIVITYLISTDELEGATE_H
 #include <QItemDelegate>
+#include <QElapsedTimer>
 
 class ActivityListDelegate : public QItemDelegate
 {
@@ -14,6 +15,7 @@ protected:
 //    virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
 //    virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
 //    virtual void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    QElapsedTimer timer;
 };
 
 #endif // LABELDDELEGATE_H

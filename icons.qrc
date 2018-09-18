@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>icons/monkey_off_32x32.png</file>
+    </qresource>
+</RCC>

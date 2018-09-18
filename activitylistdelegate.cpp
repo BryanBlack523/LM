@@ -22,7 +22,7 @@ void ActivityListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 //    QFile file (":/monkey_off_32x32.png");
 //    qDebug() << file.exists();
 
-    QIcon icon("D:/Projects/LM/icons/monkey_off_32x32.png");
+    QIcon icon(":/resources/icons/monkey_off_32x32.png");
 //    QRect iconRect(option.rect.right() - option.rect.height(), option.rect.top(), option.rect.height(), option.rect.height());
     QRect iconRect(option.rect.left(), option.rect.top(), option.rect.width(), option.rect.height());
 

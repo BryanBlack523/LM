@@ -1,9 +1,7 @@
 #include "activity.h"
 #include <QDebug>
 
-
-
-Activity::Activity(const QString &name) : m_name(name), beginDate(QDateTime::currentDateTime())
+Activity::Activity(QObject *parent, const QString &name) : QObject(parent), m_name(name), beginDate(QDateTime::currentDateTime())
 {
     timer.start();
 }
@@ -32,3 +30,4 @@ qint64 Activity::getElapsedTime() const
 }
 
 bool Activity::timeIsValid() const { return timer.elapsed() >= 30000; } //30s
+

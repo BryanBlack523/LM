@@ -1,14 +1,15 @@
 #ifndef ACTIVITY_H
 #define ACTIVITY_H
 
-#include <QString>
+#include <QObject>
 #include <QDateTime>
 #include <QElapsedTimer>
 
-class Activity
+class Activity : public QObject
 {
+    Q_OBJECT
 public:
-    Activity(const QString &);
+    explicit Activity(QObject *parent = nullptr,  const QString &name ="");
     ~Activity();
 
     QString getName() const;
@@ -23,6 +24,9 @@ private:
     QDateTime beginDate;
     QElapsedTimer timer;
 
+signals:
+
+public slots:
 };
 
 #endif // ACTIVITY_H

@@ -27,12 +27,12 @@ QVariant ActivityListModel::data(const QModelIndex &index, int role) const
 
     switch (role)
     {
-        case MR_URL: return QString::fromStdString(sources[index.row()]->url);
-        case MR_HINT: return QString::fromStdString(sources[index.row()]->hint);
-        case MR_SOURCE: return QVariant::fromValue(sources[index.row()]);
+        case 1: return activities[index.row()].getName();
+        case 2: return activities[index.row()].getBeginDate();
+        case 3: return activities[index.row()].getElapsedTime();
     }
 
-    return activities[index.row()];
+//    return activities[index.row()];
 }
 
 bool ActivityListModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -42,17 +42,17 @@ bool ActivityListModel::setData(const QModelIndex &index, const QVariant &value,
 
     switch (role)
     {
-        case MR_URL: sources[index.row()]->url = value.toString().toStdString(); return true;
-        case MR_HINT: sources[index.row()]->hint = value.toString().toStdString(); return true;
+//        case 1: activities[index.row()]->url = value.toString().toStdString(); return true;
+//        case 2: activities[index.row()]->hint = value.toString().toStdString(); return true;
     }
 
     return false;
 }
 
-QPointer<Activity> ActivityListModel::find(const std::string& name) const
+QPointer<BActivity> ActivityListModel::find(const QString& name) const
 {
-    auto it = std::find_if(activities.begin(), activities.end(), [name](QPointer<Activity> s){
-    return name == s->url;
+    auto it = std::find_if(activities.begin(), activities.end(), [name](QPointer<BActivity> s){
+        return name == s.getName();
     });
 
     return it == activities.end() ? nullptr : *it;

@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     listModel = new QStandardItemModel(this);
 
-    int x = this->height();
+//    int x = this->height();
 
     ActivityListDelegate *del = new ActivityListDelegate(this);
     ui->currentActivitiesListView->setItemDelegate(del);
@@ -94,7 +94,7 @@ void MainWindow::addActivity(const QString &cellText)
 {
     listModel->appendRow(new QStandardItem(QString(cellText)));
 
-    activities.append(Activity(cellText));
+//    activities.append(Activity(cellText));
 
 //        qDebug() << "Added value:\t" << cellText << " at x: " << listIndex.row() << " L|C " << rowCount << "|" << activities.size();
 

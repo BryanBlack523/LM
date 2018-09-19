@@ -26,15 +26,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    activity.cpp \
     activitylistdelegate.cpp \
-    activitylistmodel.cpp
+    activitylistmodel.cpp \
+    activity.cpp
 
 HEADERS += \
         mainwindow.h \
-    activity.h \
     activitylistdelegate.h \
-    activitylistmodel.h
+    activitylistmodel.h \
+    activity.h
 
 FORMS += \
         mainwindow.ui

@@ -18,6 +18,9 @@ MainWindow::MainWindow(QWidget *parent) :
     fillTable();
 
     listModel = new QStandardItemModel(this);
+
+    int x = this->height();
+
     ActivityListDelegate *del = new ActivityListDelegate(this);
     ui->currentActivitiesListView->setItemDelegate(del);
 

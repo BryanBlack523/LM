@@ -9,7 +9,7 @@ class Activity : public QObject
 {
     Q_OBJECT
 public:
-    explicit Activity(QObject *parent = nullptr,  const QString &name ="");
+    explicit Activity(QObject *parent = nullptr,  const QString &name = QString());
     ~Activity();
 
     QString getName() const;

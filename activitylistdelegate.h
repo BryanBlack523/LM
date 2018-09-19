@@ -7,7 +7,7 @@ class ActivityListDelegate : public QItemDelegate
 {
     Q_OBJECT
 public:
-    explicit ActivityListDelegate(QObject *parent = 0);
+    explicit ActivityListDelegate(QObject *parent = nullptr);
 protected:
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
     QElapsedTimer timer;

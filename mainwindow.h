@@ -42,11 +42,11 @@ private:
     QStandardItemModel *tableModel;
     QStandardItemModel *listModel;
 
-    QList<Activity> activities;
+//    QList<Activity> activities;
 
-    bool hasActivity(const QString&) const;
+//    bool hasActivity(const QString&) const;
 
-    QModelIndex getIdxActivityFromContainer(const QString&,const QModelIndex&);
+//    QModelIndex getIdxActivityFromContainer(const QString&,const QModelIndex&);
 
     void deleteActivity(const QString&);
     void addActivity(const QString&);

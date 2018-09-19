@@ -1,7 +1,7 @@
 #ifndef ACTIVITYLISTMODEL_H
 #define ACTIVITYLISTMODEL_H
 #include <QAbstractItemModel>
-#include <bactivity.h>
+#include <activity.h>
 
 class ActivityListModel : public QAbstractListModel
 {
@@ -16,9 +16,9 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
-    QPointer<BActivity> find(const QString& name) const;
+//    QPointer<Activity> find(const QString& name) const;
     private:
-    QList<BActivity> activities;
+    QList<QPointer<Activity>> activities;
 };
 
 #endif // ACTIVITYLISTMODEL_H

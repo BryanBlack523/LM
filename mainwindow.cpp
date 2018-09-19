@@ -33,7 +33,7 @@ void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
 {
     QString cellText = ui->activitiesTableView->model()->data(tableIndex).toString();
 
-    if (!hasActivity(cellText))//if not pressed - add
+    if (1==1)//(!hasActivity(cellText))//if not pressed - add
     {
         addActivity(cellText);
     }
@@ -52,15 +52,15 @@ void MainWindow::on_listActivityClicked(const QModelIndex &listIndex)
 
 
 
-bool MainWindow::hasActivity(const QString &name) const
-{
-    for (int i = 0; i < activities.size(); ++i)
-    {
-        if (activities[i].getName() == name)
-            return true;
-    }
-    return false;
-}
+//bool MainWindow::hasActivity(const QString &name) const
+//{
+//    for (int i = 0; i < activities.size(); ++i)
+//    {
+//        if (activities[i].getName() == name)
+//            return true;
+//    }
+//    return false;
+//}
 
 void MainWindow::deleteActivity(const QString &cellText)
 {
@@ -81,11 +81,11 @@ void MainWindow::deleteActivity(const QString &cellText)
 //                qDebug() << "Deleting value:\t" << cellText << " at x: " << listIndex.row() << " L|C " << listModel->rowCount(QModelIndex()) << "|" << activities.size();
             listModel->removeRows(i, 1, QModelIndex());
 
-            for (int i = 0; i < activities.size(); ++i)
-            {
-                if (activities[i].getName() == cellText)
-                    activities.removeAt(i);
-            }
+//            for (int i = 0; i < activities.size(); ++i)
+//            {
+//                if (activities[i].getName() == cellText)
+//                    activities.removeAt(i);
+//            }
         }
     }
 }
@@ -164,11 +164,5 @@ void MainWindow::on_debugButton_clicked()
     {
         QModelIndex listIndex = listModel->index(i, 0, QModelIndex());
         qDebug() << "List : " << listIndex.row() << ": " << listModel->itemData(listIndex);
-    }
-
-    qDebug() << "\nItems in CONTAINER:";
-    for (int i =0; i < activities.size(); ++i)
-    {
-        qDebug() << activities[i].getName();
     }
 }

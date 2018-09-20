@@ -1,13 +1,19 @@
 #include "activitylistmodel.h"
+#include <QDebug>
 
-ActivityListModel::ActivityListModel()
+ActivityListModel::ActivityListModel(QObject *parent) : QAbstractListModel(parent)
 {
 
 }
 
+ActivityListModel::~ActivityListModel()
+{
+    qDeleteAll(activities);
+}
+
 int ActivityListModel::rowCount(const QModelIndex&) const
 {
-    return activities.size(); // warning
+    return activities.count();
 }
 
 int ActivityListModel::columnCount(const QModelIndex&) const
@@ -28,35 +34,102 @@ QVariant ActivityListModel::data(const QModelIndex &index, int role) const
     switch (role)
     {
 //        case 0: return QString::fromStdString(activities[index.row()]->url);
-        case 1: return activities[index.row()]->getName();
-        case 2: return activities[index.row()]->getBeginDate();
-        case 3: return activities[index.row()]->getElapsedTime();
+        case Name: return activities[index.row()]->getName();
+        case BeginDate: return activities[index.row()]->getBeginDate();
+        case ElapsedTime: return activities[index.row()]->getElapsedTime();
     }
 
-    return QModelIndex();
+    return QVariant::fromValue<QPointer<Activity>>(activities[index.row()]);
 }
 
-bool ActivityListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+//bool ActivityListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+//{
+//    if (!index.isValid())
+//    return false;
+
+//    (void) value;
+
+//    switch (role)
+//    {
+////        case 1: activities[index.row()]->url = value.toString().toStdString(); return true;
+////        case 2: activities[index.row()]->hint = value.toString().toStdString(); return true;
+//    }
+
+//    return false;
+//}
+
+bool ActivityListModel::insertRows(int row, int count, QString &name, const QModelIndex &parent = QModelIndex())
 {
-    if (!index.isValid())
-    return false;
+    (void) parent;
 
-    (void) value;
-
-    switch (role)
+    beginInsertRows(QModelIndex(), row, row + count - 1);
+    for (int i = row; i < row + count; ++ i)
     {
-//        case 1: activities[index.row()]->url = value.toString().toStdString(); return true;
-//        case 2: activities[index.row()]->hint = value.toString().toStdString(); return true;
+        QPointer<Activity> p = new Activity (this, name);
+        activities.append(p);
     }
+    endInsertRows();
 
-    return false;
+    return true;
+}
+
+bool ActivityListModel::appendRow(const QString &name, const QModelIndex &parent = QModelIndex())
+{
+    (void) parent;
+
+    int row = activities.count();
+
+    beginInsertRows(QModelIndex(), row, row);
+    QPointer<Activity> p = new Activity(this, name);
+    activities.append(p);
+
+    endInsertRows();
+
+    return true;
+}
+
+bool ActivityListModel::removeRows(int row, int count, const QModelIndex &parent = QModelIndex())
+{
+    (void) parent;
+
+    beginRemoveRows(QModelIndex(), row, row + count - 1);
+    while (count--)
+        delete activities.at(row);
+    endRemoveRows();
+
+    return true;
 }
 
 QPointer<Activity> ActivityListModel::find(const QString& name) const
 {
-    auto it = std::find_if(activities.begin(), activities.end(), [name](QPointer<Activity> s){
-        return name == s->getName();
-    });
+    auto it = std::find_if(activities.begin(),
+                           activities.end(),
+                           [name](QPointer<Activity> p)
+                                {
+                                    return name == p->getName();
+                                }
+                           );
 
     return it == activities.end() ? nullptr : *it;
+}
+
+QVariant ActivityListModel::getIdx(const QString& name) const
+{
+    for (int i = 0; i < activities.count(); ++i)
+    {
+        qDebug() << i << ": " << activities.at(i)->getName();
+        if (activities.at(i)->getName() == name)
+            return i + 1;//crutch for the outgoing check
+    }
+
+    return false;
+}
+
+QHash<int, QByteArray> ActivityListModel::roleNames() const
+{
+    QHash <int,QByteArray> roles;
+    roles [Name]="name";
+    roles [BeginDate]="beginDate";
+    roles [ElapsedTime]="elapsedTime";
+    return roles;
 }

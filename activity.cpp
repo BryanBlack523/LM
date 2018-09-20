@@ -6,6 +6,18 @@ Activity::Activity(QObject *parent, const QString &name) : QObject(parent), m_na
     timer.start();
 }
 
+Activity::Activity(const Activity &other) : QObject (other.parent())
+{
+
+}
+
+Activity &Activity::operator =(const Activity &other)
+{
+    (void) other;
+
+    return *this;
+}
+
 Activity::~Activity()
 {
     if (timeIsValid())

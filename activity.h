@@ -10,6 +10,8 @@ class Activity : public QObject
     Q_OBJECT
 public:
     explicit Activity(QObject *parent = nullptr,  const QString &name = QString());
+    Activity(const Activity &other);
+    Activity& operator =(const Activity &other);
     ~Activity();
 
     QString getName() const;

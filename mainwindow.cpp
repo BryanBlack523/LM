@@ -17,7 +17,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     fillTable();
 
-    listModel = new QStandardItemModel(this);
+//    listModel = new QStandardItemModel(this);
+    listModel = new ActivityListModel(this);
 
 //    int x = this->height();
 
@@ -33,13 +34,15 @@ void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
 {
     QString cellText = ui->activitiesTableView->model()->data(tableIndex).toString();
 
-    if (1==1)//(!hasActivity(cellText))//if not pressed - add
+    if (!hasActivity(cellText))//if not pressed - add
     {
         addActivity(cellText);
     }
     else//else delete
     {
+        qDebug() << cellText << " found";
         deleteActivity(cellText);
+        qDebug() << cellText << " deleted";
     }
 }
 
@@ -50,53 +53,31 @@ void MainWindow::on_listActivityClicked(const QModelIndex &listIndex)
     deleteActivity(cellText);
 }
 
-
-
-//bool MainWindow::hasActivity(const QString &name) const
-//{
-//    for (int i = 0; i < activities.size(); ++i)
-//    {
-//        if (activities[i].getName() == name)
-//            return true;
-//    }
-//    return false;
-//}
+bool MainWindow::hasActivity(const QString &name) const
+{
+    return listModel->find(name);
+}
 
 void MainWindow::deleteActivity(const QString &cellText)
 {
     int rowCount = listModel->rowCount();
 
-    QRegularExpression reg("^" + cellText + "$");//exactly the right word
+    qDebug() << rowCount << " rows in list";
 
-    for (int i = 0; i < rowCount; ++i)
+    QVariant row = listModel->getIdx(cellText);
+
+    if (!row.toBool())
+        qDebug() << "Failed to get Idx of " << cellText;
+    else
     {
-        QModelIndex listIndex = listModel->index(i, 0, QModelIndex());
-
-        QRegularExpressionMatch match = reg.match(listModel->itemData(listIndex).value(0).toString());
-
-//            qDebug() << i << " " << listModel->itemData(listIndex).value(0).toString().contains(cellText) << " Data:" << listModel->itemData(listIndex).value(0);
-
-        if(match.hasMatch())
-        {
-//                qDebug() << "Deleting value:\t" << cellText << " at x: " << listIndex.row() << " L|C " << listModel->rowCount(QModelIndex()) << "|" << activities.size();
-            listModel->removeRows(i, 1, QModelIndex());
-
-//            for (int i = 0; i < activities.size(); ++i)
-//            {
-//                if (activities[i].getName() == cellText)
-//                    activities.removeAt(i);
-//            }
-        }
+        row = row.toInt() - 1;// why? check ActivityListModel::getIdx()
+        listModel->removeRows(row.toInt(), 1, QModelIndex());
     }
 }
 
 void MainWindow::addActivity(const QString &cellText)
 {
-    listModel->appendRow(new QStandardItem(QString(cellText)));
-
-//    activities.append(Activity(cellText));
-
-//        qDebug() << "Added value:\t" << cellText << " at x: " << listIndex.row() << " L|C " << rowCount << "|" << activities.size();
+    listModel->appendRow(cellText, QModelIndex());
 
     ui->currentActivitiesListView->setModel(listModel);
 }

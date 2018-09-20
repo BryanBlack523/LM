@@ -1,5 +1,6 @@
 #pragma once
 
+#include "activitylistmodel.h"
 #include "activity.h"
 #include <QMainWindow>
 #include <QStandardItemModel>
@@ -40,13 +41,11 @@ private:
     Ui::MainWindow *ui;
 
     QStandardItemModel *tableModel;
-    QStandardItemModel *listModel;
+    ActivityListModel *listModel;
 
 //    QList<Activity> activities;
 
-//    bool hasActivity(const QString&) const;
-
-//    QModelIndex getIdxActivityFromContainer(const QString&,const QModelIndex&);
+    bool hasActivity(const QString&) const;
 
     void deleteActivity(const QString&);
     void addActivity(const QString&);

@@ -24,9 +24,13 @@ private:
     QDateTime beginDate;
     QElapsedTimer timer;
 
+
+
 signals:
 
 public slots:
 };
+
+    Q_DECLARE_METATYPE(Activity)
 
 #endif // ACTIVITY_H

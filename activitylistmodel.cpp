@@ -28,12 +28,12 @@ QVariant ActivityListModel::data(const QModelIndex &index, int role) const
     switch (role)
     {
 //        case 0: return QString::fromStdString(activities[index.row()]->url);
-//        case 1: return activities[index.row()]->getName();
-//        case 2: return activities[index.row()]->getBeginDate();
-//        case 3: return activities[index.row()]->getElapsedTime();
+        case 1: return activities[index.row()]->getName();
+        case 2: return activities[index.row()]->getBeginDate();
+        case 3: return activities[index.row()]->getElapsedTime();
     }
 
-//    return activities[index.row()];
+    return QModelIndex();
 }
 
 bool ActivityListModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -52,11 +52,11 @@ bool ActivityListModel::setData(const QModelIndex &index, const QVariant &value,
     return false;
 }
 
-//QPointer<Activity> ActivityListModel::find(const QString& name) const
-//{
-//    auto it = std::find_if(activities.begin(), activities.end(), [name](QPointer<Activity> s){
-//        return name == s.getName();
-//    });
+QPointer<Activity> ActivityListModel::find(const QString& name) const
+{
+    auto it = std::find_if(activities.begin(), activities.end(), [name](QPointer<Activity> s){
+        return name == s->getName();
+    });
 
-//    return it == activities.end() ? nullptr : *it;
-//}
+    return it == activities.end() ? nullptr : *it;
+}

@@ -1,12 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "activitylistdelegate.h"
-#include <QStandardItemModel>
+//#include <QStandardItemModel>
 #include <QTableView>
 #include <QStandardItem>
 #include <QString>
 #include <QErrorMessage>
 #include <QDebug>
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -25,8 +26,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ActivityListDelegate *del = new ActivityListDelegate(this);
     ui->currentActivitiesListView->setItemDelegate(del);
 
+    timer_1s->start(1000);
+
     connect(ui->activitiesTableView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_tableActivityClicked(const QModelIndex&)));
     connect(ui->currentActivitiesListView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_listActivityClicked(const QModelIndex&)));
+    connect(timer_1s, SIGNAL(timeout()), this, SLOT(updateTime()));//emit dataChange to refresh elapsed time in real time, 1s period
 
 }
 
@@ -51,6 +55,13 @@ void MainWindow::on_listActivityClicked(const QModelIndex &listIndex)
     QString cellText = ui->currentActivitiesListView->model()->data(listIndex).toString();
 
     deleteActivity(cellText);
+}
+
+void MainWindow::updateTime()
+{
+    int rowCount = ui->currentActivitiesListView->model()->rowCount();
+
+    ui->currentActivitiesListView->model()->dataChanged(listModel->index(0, 0, QModelIndex()), listModel->index(rowCount, 0, QModelIndex()));
 }
 
 bool MainWindow::hasActivity(const QString &name) const

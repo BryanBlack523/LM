@@ -17,6 +17,9 @@ void ActivityListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 
     QRect labelRect (option.rect.left(), option.rect.top(), option.rect.width(), option.rect.height());
     QRect boundingRect;
+
+    QString s = index.data(ActivityListModel::Name);
+
     painter->drawText(labelRect, Qt::AlignCenter, index.data().toString(), &boundingRect);
 
     QString out = QString("%1:%2:%3").arg(timer.elapsed() /  360000          , 2, 10, QChar('0'))

@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QList>
+#include <QTimer>
 
 namespace Ui {
 class MainWindow;
@@ -22,6 +23,7 @@ private slots:
 
     void on_tableActivityClicked(const QModelIndex &);
     void on_listActivityClicked(const QModelIndex &);
+    void updateTime();
 
     void on_TimeButton_clicked();
 
@@ -43,7 +45,7 @@ private:
     QStandardItemModel *tableModel;
     ActivityListModel *listModel;
 
-//    QList<Activity> activities;
+    QTimer *timer_1s;
 
     bool hasActivity(const QString&) const;
 

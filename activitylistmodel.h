@@ -3,6 +3,7 @@
 #include <QAbstractItemModel>
 #include <activity.h>
 #include <QPointer>
+//#include <QTimer>
 
 class ActivityListModel : public QAbstractListModel
 {
@@ -37,6 +38,7 @@ public:
 
     private:
     QList<QPointer<Activity>> activities;
+//    QTimer *timer_1s;
 };
 
 #endif // ACTIVITYLISTMODEL_H

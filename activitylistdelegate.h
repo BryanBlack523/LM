@@ -2,6 +2,7 @@
 #define ACTIVITYLISTDELEGATE_H
 #include <QItemDelegate>
 #include <QElapsedTimer>
+#include <activitylistmodel.h>
 
 class ActivityListDelegate : public QItemDelegate
 {

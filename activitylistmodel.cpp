@@ -130,6 +130,6 @@ QHash<int, QByteArray> ActivityListModel::roleNames() const
     QHash <int,QByteArray> roles;
     roles [Name]="name";
     roles [BeginDate]="beginDate";
-    roles [ElapsedTime]="elapsedTime";
+    roles [ElapsedTime]="ElapsedTime";
     return roles;
 }

@@ -26,8 +26,6 @@ private:
     QDateTime beginDate;
     QElapsedTimer timer;
 
-
-
 signals:
 
 public slots:

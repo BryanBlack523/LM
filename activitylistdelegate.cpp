@@ -1,12 +1,8 @@
 #include "activitylistdelegate.h"
 #include <QDebug>
 #include <QPainter>
-#include <QTime>
 
-ActivityListDelegate::ActivityListDelegate(QObject *parent) :QItemDelegate (parent)
-{
-    timer.start();
-}
+ActivityListDelegate::ActivityListDelegate(QObject *parent) :QItemDelegate (parent) {}
 
 void ActivityListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
@@ -19,14 +15,16 @@ void ActivityListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
     QRect labelRect (option.rect.left(), option.rect.top(), option.rect.width(), option.rect.height());
     QRect boundingRect;
 
-    QString s = index.data(ActivityListModel::Name).toString();
-    qDebug() << "delegate name of activity " << s;
+    QString name = index.data(ActivityListModel::Name).toString();
+//    qDebug() << "delegate name of activity " << name;
 
-    painter->drawText(labelRect, Qt::AlignCenter, s, &boundingRect);
+    painter->drawText(labelRect, Qt::AlignCenter, name, &boundingRect);
 
-    QString out = QString("%1:%2:%3").arg(timer.elapsed() /  360000          , 2, 10, QChar('0'))
-                                     .arg((timer.elapsed() % 360000)/ 60000, 2, 10, QChar('0'))
-                                     .arg((timer.elapsed() % 60000) /  1000  , 2, 10, QChar('0'));
+    int time = index.data(ActivityListModel::ElapsedTime).toInt();
+
+    QString out = QString("%1:%2:%3").arg(time /  360000          , 2, 10, QChar('0'))
+                                     .arg((time % 360000)/ 60000, 2, 10, QChar('0'))
+                                     .arg((time % 60000) /  1000  , 2, 10, QChar('0'));
 
     painter->drawText(labelRect, Qt::AlignRight, out, &boundingRect);
 }

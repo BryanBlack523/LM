@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "activitylistdelegate.h"
-//#include <QStandardItemModel>
 #include <QTableView>
 #include <QStandardItem>
 #include <QString>
@@ -13,21 +12,17 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-//    qDebug() << "well, we're here";
     ui->setupUi(this);
     ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
     fillTable();
-//    qDebug() << "table filled";
-//    listModel = new QStandardItemModel(this);
+
     listModel = new ActivityListModel(this);
-//    qDebug() << "model created";
 
 //    int x = this->height();
 
     ActivityListDelegate *del = new ActivityListDelegate(this);
     ui->currentActivitiesListView->setItemDelegate(del);
-//    qDebug() << "delegate set";
 
     timer_1s = new QTimer(this);
 
@@ -35,11 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->currentActivitiesListView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_listActivityClicked(const QModelIndex&)));
     connect(timer_1s, SIGNAL(timeout()), this, SLOT(updateTime()));//emit dataChange to refresh elapsed time in real time, 1s period
 
-    qDebug() << "connections set";
-
     timer_1s->start(1000);
-
-    qDebug() << "timer started";
 }
 
 void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
@@ -48,13 +39,11 @@ void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
 
     if (!hasActivity(cellText))//if not pressed - add
     {
-//        qDebug() << cellText << " found";
         addActivity(cellText);
         qDebug() << cellText << " added";
     }
     else//else delete
     {
-//        qDebug() << cellText << " found";
         deleteActivity(cellText);
         qDebug() << cellText << " deleted";
     }
@@ -62,18 +51,21 @@ void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
 
 void MainWindow::on_listActivityClicked(const QModelIndex &listIndex)
 {
-    QString cellText = ui->currentActivitiesListView->model()->data(listIndex).toString();
+    if (!listIndex.isValid())
+    {
+        qDebug() << "index is not valid";
+    }
+
+    QString cellText = listModel->data(listIndex, ActivityListModel::Name).toString();
 
     deleteActivity(cellText);
 }
 
 void MainWindow::updateTime()
 {
-//    qDebug() << "updateTime";
     int rowCount = listModel->rowCount(QModelIndex());
-//    qDebug() << "rowCount is fine";
+
     listModel->dataChanged(listModel->index(0, 0, QModelIndex()), listModel->index(rowCount, 0, QModelIndex()));
-//    qDebug() << "datachanged";
 }
 
 bool MainWindow::hasActivity(const QString &name) const
@@ -160,13 +152,14 @@ void MainWindow::on_GraphsButton_2_clicked()
 
 void MainWindow::on_debugButton_clicked()
 {
-    qDebug() << "Here's what i got:\n";
     qDebug() << "Items in LIST:";
     int rowCount = listModel->rowCount(QModelIndex());
 
     for (int i = 0; i < rowCount; ++i)
     {
         QModelIndex listIndex = listModel->index(i, 0, QModelIndex());
-        qDebug() << "List : " << listIndex.row() << ": " << listModel->itemData(listIndex);
+        qDebug() << "Activity started : " << listIndex.row() << ": " << listModel->data(listIndex, ActivityListModel::BeginDate)
+                                                             << " " << listModel->data(listIndex, ActivityListModel::Name)
+                                                             << " " << listModel->data(listIndex, ActivityListModel::ElapsedTime);
     }
 }

@@ -2,10 +2,7 @@
 #include <QDebug>
 #include <QSize>
 
-ActivityListModel::ActivityListModel(QObject *parent) : QAbstractListModel(parent)
-{
-
-}
+ActivityListModel::ActivityListModel(QObject *parent) : QAbstractListModel(parent) {}
 
 ActivityListModel::~ActivityListModel()
 {
@@ -29,57 +26,38 @@ QModelIndex ActivityListModel::parent(const QModelIndex&) const
 
 QVariant ActivityListModel::data(const QModelIndex &index, int role) const
 {
-//    qDebug() << "ActivityListModel::data called";
     if (!index.isValid())
     {
         qDebug() << "index is not valid";
         return QVariant();
     }
-//    qDebug() << "role = " << role;
 
     switch (role)
     {
-        case Name:
-    {
-        qDebug() << "Name Role called";
-        return activities[index.row()]->getName();
-    }
-        case BeginDate:
-    {
-        qDebug() << "BeginDate Role called";
-        return activities[index.row()]->getBeginDate();
-    }
-        case ElapsedTime:
-    {
-        qDebug() << "ElapsedTime Role called";
-        return activities[index.row()]->getElapsedTime();
-    }
-    case Qt::SizeHintRole:
-        return QSize(100, 100);
-//    default:
-//        return QAbstractListModel::data(index, role);
+        case Name: return activities[index.row()]->getName();
+        case BeginDate: return activities[index.row()]->getBeginDate();
+        case ElapsedTime: return activities[index.row()]->getElapsedTime();
+        case Qt::SizeHintRole: return QSize(100, 100);
     }
 
-    qDebug() << "no roles called";
     return QModelIndex();
-//    return QVariant::fromValue<QPointer<Activity>>(activities[index.row()]);
 }
 
-bool ActivityListModel::setData(const QModelIndex &index, const QVariant &value, int role)
-{
-    if (!index.isValid())
-        return false;
+//bool ActivityListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+//{
+//    if (!index.isValid())
+//        return false;
 
-    (void) value;
+//    (void) value;
 
-    switch (role)
-    {
-//        case 1: activities[index.row()]->url = value.toString().toStdString(); return true;
-//        case 2: activities[index.row()]->hint = value.toString().toStdString(); return true;
-    }
+//    switch (role)
+//    {
+////        case 1: activities[index.row()]->url = value.toString().toStdString(); return true;
+////        case 2: activities[index.row()]->hint = value.toString().toStdString(); return true;
+//    }
 
-    return false;
-}
+//    return false;
+//}
 
 bool ActivityListModel::insertRows(int row, int count, QString &name, const QModelIndex &parent = QModelIndex())
 {
@@ -117,7 +95,7 @@ bool ActivityListModel::removeRows(int row, int count, const QModelIndex &parent
 
     beginRemoveRows(QModelIndex(), row, row + count - 1);
     while (count--)
-        delete activities.at(row);
+        delete activities.takeAt(row);
     endRemoveRows();
 
     return true;

@@ -6,10 +6,7 @@ Activity::Activity(QObject *parent, const QString &name) : QObject(parent), m_na
     timer.start();
 }
 
-Activity::Activity(const Activity &other) : QObject (other.parent())
-{
-
-}
+Activity::Activity(const Activity &other) : QObject (other.parent()) {}
 
 Activity &Activity::operator =(const Activity &other)
 {
@@ -42,4 +39,3 @@ qint64 Activity::getElapsedTime() const
 }
 
 bool Activity::timeIsValid() const { return timer.elapsed() >= 30000; } //30s
-

@@ -3,7 +3,6 @@
 #include <QAbstractItemModel>
 #include <activity.h>
 #include <QPointer>
-//#include <QTimer>
 
 class ActivityListModel : public QAbstractListModel
 {
@@ -20,7 +19,7 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+//    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
     QPointer<Activity> find(const QString& name) const;
     QVariant getIdx(const QString& name) const;
@@ -40,7 +39,6 @@ public:
 
     private:
     QList<QPointer<Activity>> activities;
-//    QTimer *timer_1s;
 };
 
 #endif // ACTIVITYLISTMODEL_H

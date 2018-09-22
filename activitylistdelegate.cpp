@@ -10,6 +10,7 @@ ActivityListDelegate::ActivityListDelegate(QObject *parent) :QItemDelegate (pare
 
 void ActivityListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+//    qDebug() << "paint is called";
     QIcon icon(":/resources/icons/monkey_off_32x32.png");
     QRect iconRect(option.rect.left(), option.rect.top(), option.rect.width(), option.rect.height());
 
@@ -18,9 +19,10 @@ void ActivityListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
     QRect labelRect (option.rect.left(), option.rect.top(), option.rect.width(), option.rect.height());
     QRect boundingRect;
 
-    QString s = index.data(ActivityListModel::Name);
+    QString s = index.data(ActivityListModel::Name).toString();
+    qDebug() << "delegate name of activity " << s;
 
-    painter->drawText(labelRect, Qt::AlignCenter, index.data().toString(), &boundingRect);
+    painter->drawText(labelRect, Qt::AlignCenter, s, &boundingRect);
 
     QString out = QString("%1:%2:%3").arg(timer.elapsed() /  360000          , 2, 10, QChar('0'))
                                      .arg((timer.elapsed() % 360000)/ 60000, 2, 10, QChar('0'))

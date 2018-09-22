@@ -13,25 +13,33 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+//    qDebug() << "well, we're here";
     ui->setupUi(this);
     ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
     fillTable();
-
+//    qDebug() << "table filled";
 //    listModel = new QStandardItemModel(this);
     listModel = new ActivityListModel(this);
+//    qDebug() << "model created";
 
 //    int x = this->height();
 
     ActivityListDelegate *del = new ActivityListDelegate(this);
     ui->currentActivitiesListView->setItemDelegate(del);
+//    qDebug() << "delegate set";
 
-    timer_1s->start(1000);
+    timer_1s = new QTimer(this);
 
     connect(ui->activitiesTableView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_tableActivityClicked(const QModelIndex&)));
     connect(ui->currentActivitiesListView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_listActivityClicked(const QModelIndex&)));
     connect(timer_1s, SIGNAL(timeout()), this, SLOT(updateTime()));//emit dataChange to refresh elapsed time in real time, 1s period
 
+    qDebug() << "connections set";
+
+    timer_1s->start(1000);
+
+    qDebug() << "timer started";
 }
 
 void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
@@ -40,11 +48,13 @@ void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
 
     if (!hasActivity(cellText))//if not pressed - add
     {
+//        qDebug() << cellText << " found";
         addActivity(cellText);
+        qDebug() << cellText << " added";
     }
     else//else delete
     {
-        qDebug() << cellText << " found";
+//        qDebug() << cellText << " found";
         deleteActivity(cellText);
         qDebug() << cellText << " deleted";
     }
@@ -59,9 +69,11 @@ void MainWindow::on_listActivityClicked(const QModelIndex &listIndex)
 
 void MainWindow::updateTime()
 {
-    int rowCount = ui->currentActivitiesListView->model()->rowCount();
-
-    ui->currentActivitiesListView->model()->dataChanged(listModel->index(0, 0, QModelIndex()), listModel->index(rowCount, 0, QModelIndex()));
+//    qDebug() << "updateTime";
+    int rowCount = listModel->rowCount(QModelIndex());
+//    qDebug() << "rowCount is fine";
+    listModel->dataChanged(listModel->index(0, 0, QModelIndex()), listModel->index(rowCount, 0, QModelIndex()));
+//    qDebug() << "datachanged";
 }
 
 bool MainWindow::hasActivity(const QString &name) const

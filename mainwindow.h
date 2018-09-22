@@ -23,6 +23,7 @@ private slots:
 
     void on_tableActivityClicked(const QModelIndex &);
     void on_listActivityClicked(const QModelIndex &);
+
     void updateTime();
 
     void on_TimeButton_clicked();

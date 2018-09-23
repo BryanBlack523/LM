@@ -63,9 +63,14 @@ void MainWindow::on_listActivityClicked(const QModelIndex &listIndex)
 
 void MainWindow::updateTime()
 {
-    int rowCount = listModel->rowCount(QModelIndex());
+    if (ui->mwStackedWidget->currentIndex() == 0 && ui->timeStackedWidget->currentIndex() == 0)
+    {
+        int rowCount = listModel->rowCount(QModelIndex());
 
-    listModel->dataChanged(listModel->index(0, 0, QModelIndex()), listModel->index(rowCount, 0, QModelIndex()));
+        listModel->dataChanged(listModel->index(0, 0, QModelIndex()), listModel->index(rowCount, 0, QModelIndex()));
+    }
+    else
+        qDebug() << "mainwindow::updatetime called when not on present time page";
 }
 
 bool MainWindow::hasActivity(const QString &name) const

@@ -15,6 +15,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
+    fillFrequencyTable();
+
+    frequencyModel->sort(1, Qt::DescendingOrder);
+
     fillTable();
 
     listModel = new ActivityListModel(this);
@@ -31,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timer_1s, SIGNAL(timeout()), this, SLOT(updateTime()));//emit dataChange to refresh elapsed time in real time, 1s period
 
     timer_1s->start(1000);
+
+
 }
 
 void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
@@ -104,20 +110,54 @@ void MainWindow::addActivity(const QString &cellText)
 
 void MainWindow::fillTable()
 {
-    tableModel = new QStandardItemModel(2,3,this);
+    int items = frequencyModel->rowCount();
+    int collumns = 4;
 
-    tableModel->setHorizontalHeaderItem(0, new QStandardItem(QString("Column 1")));
-    tableModel->setHorizontalHeaderItem(1, new QStandardItem(QString("Column 2")));
-    tableModel->setHorizontalHeaderItem(2, new QStandardItem(QString("Column 3")));
+    int rows = items / collumns + ((items % collumns) ? 1 : 0);
 
-    tableModel->setData (tableModel->index(0,0), "cat");
-    tableModel->setData (tableModel->index(0,1), "dog");
-    tableModel->setData (tableModel->index(0,2), "par");
-    tableModel->setData (tableModel->index(1,0), "cat2");
-    tableModel->setData (tableModel->index(1,1), "dog2");
-    tableModel->setData (tableModel->index(1,2), "par2");
+    tableModel = new QStandardItemModel(rows, collumns, this);
+
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < collumns; ++j)
+        {
+            int filledCount = i * 4 + j;
+
+            if (filledCount < items)
+            {
+                QString name = frequencyModel->data(frequencyModel->index(filledCount, 0)).toString();
+
+                tableModel->setData(tableModel->index(i, j), name);
+            }
+        }
+    }
 
     ui->activitiesTableView->setModel(tableModel);
+}
+
+void MainWindow::fillFrequencyTable()
+{
+    frequencyModel = new QStandardItemModel(6,2,this);
+
+    frequencyModel->setData (frequencyModel->index(0,0), "cat");
+    frequencyModel->setData (frequencyModel->index(0,1), "56");
+
+    frequencyModel->setData (frequencyModel->index(1,0), "dog");
+    frequencyModel->setData (frequencyModel->index(1,1), "23");
+
+    frequencyModel->setData (frequencyModel->index(2,0), "par");
+    frequencyModel->setData (frequencyModel->index(2,1), "41");
+
+    frequencyModel->setData (frequencyModel->index(3,0), "cat2");
+    frequencyModel->setData (frequencyModel->index(3,1), "15");
+
+    frequencyModel->setData (frequencyModel->index(4,0), "dog2");
+    frequencyModel->setData (frequencyModel->index(4,1), "18");
+
+    frequencyModel->setData (frequencyModel->index(5,0), "par2");
+    frequencyModel->setData (frequencyModel->index(5,1), "1");
+
+    ui->debugTableView->setModel(frequencyModel);
 }
 
 MainWindow::~MainWindow()

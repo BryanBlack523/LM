@@ -44,6 +44,7 @@ private:
     Ui::MainWindow *ui;
 
     QStandardItemModel *tableModel;
+    QStandardItemModel *frequencyModel;
     ActivityListModel *listModel;
 
     QTimer *timer_1s;
@@ -54,4 +55,5 @@ private:
     void addActivity(const QString&);
 
     void fillTable();
+    void fillFrequencyTable();
 };

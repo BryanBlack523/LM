@@ -25,6 +25,7 @@ private slots:
     void on_listActivityClicked(const QModelIndex &);
 
     void updateTime();
+    void updateTable();
 
     void on_TimeButton_clicked();
 
@@ -38,8 +39,6 @@ private slots:
 
     void on_HistoryButton_2_clicked();
 
-    void on_debugButton_clicked();
-
 private:
     Ui::MainWindow *ui;
 
@@ -48,8 +47,7 @@ private:
     ActivityListModel *listModel;
 
     QTimer *timer_1s;
-
-    bool hasActivity(const QString&) const;
+    QTimer *timer_1h;
 
     void deleteActivity(const QString&);
     void addActivity(const QString&);

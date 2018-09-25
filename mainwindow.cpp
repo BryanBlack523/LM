@@ -29,67 +29,33 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->currentActivitiesListView->setItemDelegate(del);
 
     timer_1s = new QTimer(this);
+    timer_1h = new QTimer(this);
 
     connect(ui->activitiesTableView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_tableActivityClicked(const QModelIndex&)));
     connect(ui->currentActivitiesListView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_listActivityClicked(const QModelIndex&)));
     connect(timer_1s, SIGNAL(timeout()), this, SLOT(updateTime()));//emit dataChange to refresh elapsed time in real time, 1s period
 
-    timer_1s->start(1000);
+    timer_1s->start(1000);//1s
 
+    connect(timer_1h, SIGNAL(timeout()), this, SLOT(updateTable()));//refill table after 1h (to keep up with changes)
 
+    timer_1h->start(10000);//1h 360000
 }
 
-void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
+MainWindow::~MainWindow()
 {
-    QString cellText = ui->activitiesTableView->model()->data(tableIndex).toString();
-
-    if (!hasActivity(cellText))//if not pressed - add
-    {
-        addActivity(cellText);
-        qDebug() << cellText << " added";
-    }
-    else//else delete
-    {
-        deleteActivity(cellText);
-        qDebug() << cellText << " deleted";
-    }
+    delete ui;
 }
 
-void MainWindow::on_listActivityClicked(const QModelIndex &listIndex)
+void MainWindow::addActivity(const QString &cellText)
 {
-    if (!listIndex.isValid())
-    {
-        qDebug() << "index is not valid";
-    }
+    listModel->appendRow(cellText, QModelIndex());
 
-    QString cellText = listModel->data(listIndex, ActivityListModel::Name).toString();
-
-    deleteActivity(cellText);
-}
-
-void MainWindow::updateTime()
-{
-    if (ui->mwStackedWidget->currentIndex() == 0 && ui->timeStackedWidget->currentIndex() == 0)
-    {
-        int rowCount = listModel->rowCount(QModelIndex());
-
-        listModel->dataChanged(listModel->index(0, 0, QModelIndex()), listModel->index(rowCount, 0, QModelIndex()));
-    }
-    else
-        qDebug() << "mainwindow::updatetime called when not on present time page";
-}
-
-bool MainWindow::hasActivity(const QString &name) const
-{
-    return listModel->find(name);
+    ui->currentActivitiesListView->setModel(listModel);
 }
 
 void MainWindow::deleteActivity(const QString &cellText)
 {
-    int rowCount = listModel->rowCount();
-
-    qDebug() << rowCount << " rows in list";
-
     QVariant row = listModel->getIdx(cellText);
 
     if (!row.toBool())
@@ -101,19 +67,15 @@ void MainWindow::deleteActivity(const QString &cellText)
     }
 }
 
-void MainWindow::addActivity(const QString &cellText)
-{
-    listModel->appendRow(cellText, QModelIndex());
-
-    ui->currentActivitiesListView->setModel(listModel);
-}
+//-------------------------- initialise models
 
 void MainWindow::fillTable()
 {
+//    qDebug() << "fillTable";
     int items = frequencyModel->rowCount();
     int collumns = 4;
 
-    int rows = items / collumns + ((items % collumns) ? 1 : 0);
+    int rows = items / collumns + ((items % collumns) ? 1 : 0); // add whole number + 1 if there is something left
 
     tableModel = new QStandardItemModel(rows, collumns, this);
 
@@ -121,14 +83,17 @@ void MainWindow::fillTable()
     {
         for (int j = 0; j < collumns; ++j)
         {
-            int filledCount = i * 4 + j;
+            int filledCount = i * collumns + j;// number of items added
 
+//            qDebug() << i << "/" << j << " filledCount " << filledCount << " item " << frequencyModel->data(frequencyModel->index(filledCount, 0)).toString();
             if (filledCount < items)
             {
                 QString name = frequencyModel->data(frequencyModel->index(filledCount, 0)).toString();
 
                 tableModel->setData(tableModel->index(i, j), name);
             }
+            else
+                tableModel->itemFromIndex(tableModel->index(i, j))->setFlags(Qt::NoItemFlags);//set item not active for user
         }
     }
 
@@ -160,10 +125,59 @@ void MainWindow::fillFrequencyTable()
     ui->debugTableView->setModel(frequencyModel);
 }
 
-MainWindow::~MainWindow()
+//--------------------------------SLOTS implementation
+
+void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
 {
-    delete ui;
+    QString cellText = ui->activitiesTableView->model()->data(tableIndex).toString();
+
+    if (!cellText.isEmpty())
+    {
+        if (!listModel->find(cellText))
+        {
+            addActivity(cellText);
+            qDebug() << cellText << " added";
+        }
+        else//else delete
+        {
+            deleteActivity(cellText);
+            qDebug() << cellText << " deleted";
+        }
+    }
 }
+
+void MainWindow::on_listActivityClicked(const QModelIndex &listIndex)
+{
+    if (!listIndex.isValid())
+        qDebug() << "index is not valid";
+
+    QString cellText = listModel->data(listIndex, ActivityListModel::Name).toString();
+
+    deleteActivity(cellText);
+}
+
+void MainWindow::updateTime()
+{
+    if (ui->mwStackedWidget->currentIndex() == 0 && ui->timeStackedWidget->currentIndex() == 0)
+    {
+        int rowCount = listModel->rowCount(QModelIndex());
+
+        listModel->dataChanged(listModel->index(0, 0, QModelIndex()), listModel->index(rowCount, 0, QModelIndex()));
+    }
+    else
+        qDebug() << "mainwindow::updatetime called when not on present time page";
+}
+
+void MainWindow::updateTable()
+{
+    frequencyModel->sort(1,  Qt::DescendingOrder);
+
+    ui->debugTableView->setModel(frequencyModel);
+
+    fillTable();
+}
+
+//---------------------------Push Buttons SLOTS
 
 void MainWindow::on_TimeButton_clicked()
 {
@@ -193,18 +207,4 @@ void MainWindow::on_HistoryButton_2_clicked()
 void MainWindow::on_GraphsButton_2_clicked()
 {
     ui->timeStackedWidget->setCurrentIndex(2);//open timePage.graphsPage
-}
-
-void MainWindow::on_debugButton_clicked()
-{
-    qDebug() << "Items in LIST:";
-    int rowCount = listModel->rowCount(QModelIndex());
-
-    for (int i = 0; i < rowCount; ++i)
-    {
-        QModelIndex listIndex = listModel->index(i, 0, QModelIndex());
-        qDebug() << "Activity started : " << listIndex.row() << ": " << listModel->data(listIndex, ActivityListModel::BeginDate)
-                                                             << " " << listModel->data(listIndex, ActivityListModel::Name)
-                                                             << " " << listModel->data(listIndex, ActivityListModel::ElapsedTime);
-    }
 }

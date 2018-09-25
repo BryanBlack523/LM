@@ -37,7 +37,7 @@ QVariant ActivityListModel::data(const QModelIndex &index, int role) const
         case Name: return activities[index.row()]->getName();
         case BeginDate: return activities[index.row()]->getBeginDate();
         case ElapsedTime: return activities[index.row()]->getElapsedTime();
-        case Qt::SizeHintRole: return QSize(100, 100);
+        case Qt::SizeHintRole: return QSize(70, 70);
     }
 
     return QModelIndex();

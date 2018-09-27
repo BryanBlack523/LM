@@ -118,7 +118,7 @@ QVariant ActivityListModel::getIdx(const QString& name) const
 {
     for (int i = 0; i < activities.count(); ++i)
     {
-        qDebug() << i << ": " << activities.at(i)->getName();
+//        qDebug() << i << ": " << activities.at(i)->getName();
         if (activities.at(i)->getName() == name)
             return i + 1;//crutch for the outgoing check
     }

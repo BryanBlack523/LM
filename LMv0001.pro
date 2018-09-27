@@ -28,16 +28,19 @@ SOURCES += \
         mainwindow.cpp \
     activitylistdelegate.cpp \
     activitylistmodel.cpp \
-    activity.cpp
+    activity.cpp \
+    menuwindow.cpp
 
 HEADERS += \
         mainwindow.h \
     activitylistdelegate.h \
     activitylistmodel.h \
-    activity.h
+    activity.h \
+    menuwindow.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    menuwindow.ui
 
 RESOURCES += \
     resourses.qrc

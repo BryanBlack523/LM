@@ -1,11 +1,13 @@
 #pragma once
 
+#include "menuwindow.h"
 #include "activitylistmodel.h"
 #include "activity.h"
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QList>
 #include <QTimer>
+#include <QKeyEvent>
 
 namespace Ui {
 class MainWindow;
@@ -27,6 +29,7 @@ private slots:
 
     void updateTime();
     void updateTable();
+    void keyPressEvent(QKeyEvent *key);
 
     void on_TimeButton_clicked();
 
@@ -42,6 +45,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    MenuWindow *menu;
 
     QStandardItemModel *tableModel;
     QStandardItemModel *frequencyModel;

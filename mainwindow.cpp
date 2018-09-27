@@ -77,6 +77,16 @@ void MainWindow::deleteActivity(const QString &cellText)
     }
 }
 
+void MainWindow::keyPressEvent(QKeyEvent* key)
+{
+    qDebug() << "here";
+    if ( (key->key()== Qt::Key_F1))
+    {
+        menu = new MenuWindow(this);
+        menu->show();
+    }
+}
+
 //-------------------------- initialise models
 
 void MainWindow::fillTable()

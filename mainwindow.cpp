@@ -15,11 +15,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
-    fillFrequencyTable();
+    qDebug() << "here";
 
-    frequencyModel->sort(1, Qt::DescendingOrder);
+    fillFrequencyTable();
+    qDebug() << "here";
+
+//    frequencyModel->sort(1, Qt::DescendingOrder);
 
     fillTable();
+    qDebug() << "here";
 
     listModel = new ActivityListModel(this);
 
@@ -37,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     timer_1s->start(1000);//1s
 
-    connect(timer_1h, SIGNAL(timeout()), this, SLOT(updateTable()));//refill table after 1h (to keep up with changes)
+//    connect(timer_1h, SIGNAL(timeout()), this, SLOT(updateTable()));//refill table after 1h (to keep up with changes)
 
     timer_1h->start(10000);//1h 360000
 }
@@ -76,8 +80,13 @@ void MainWindow::fillTable()
     int collumns = 4;
 
     int rows = items / collumns + ((items % collumns) ? 1 : 0); // add whole number + 1 if there is something left
-
-    tableModel = new QStandardItemModel(rows, collumns, this);
+    proxyTableModel = new QSortFilterProxyModel();
+    qDebug() << "proxy model";
+    proxyTableModel->setDynamicSortFilter(true);
+    qDebug() << "sort enabled";
+    proxyTableModel->setFilterRole(FrequencyModel::frR_ClickCount);
+    qDebug() << "filter set";
+//    proxyTableModel->setData()
 
     for (int i = 0; i < rows; ++i)
     {
@@ -88,41 +97,31 @@ void MainWindow::fillTable()
 //            qDebug() << i << "/" << j << " filledCount " << filledCount << " item " << frequencyModel->data(frequencyModel->index(filledCount, 0)).toString();
             if (filledCount < items)
             {
+                qDebug() << "before name";
                 QString name = frequencyModel->data(frequencyModel->index(filledCount, 0)).toString();
-
-                tableModel->setData(tableModel->index(i, j), name);
+                qDebug() << "before setData";
+                proxyTableModel->setData(proxyTableModel->index(i, j), name);
             }
-            else
-                tableModel->itemFromIndex(tableModel->index(i, j))->setFlags(Qt::NoItemFlags);//set item not active for user
+//            else
+//                proxyTableModel->itemFromIndex(proxyTableModel->index(i, j))->setFlags(Qt::NoItemFlags);//set item not active for user
         }
     }
+    qDebug() << "after for";
 
-    ui->activitiesTableView->setModel(tableModel);
+    ui->activitiesTableView->setModel(proxyTableModel);
 }
 
 void MainWindow::fillFrequencyTable()
-{
-    frequencyModel = new QStandardItemModel(6,2,this);
+{    
+    frequencyModel->appendRow("cat", 56, QModelIndex());
+    frequencyModel->appendRow("dog", 23, QModelIndex());
+    frequencyModel->appendRow("par", 41, QModelIndex());
+    frequencyModel->appendRow("cat2", 15, QModelIndex());
+    frequencyModel->appendRow("dog2", 18, QModelIndex());
+    frequencyModel->appendRow("par2", 1, QModelIndex());
 
-    frequencyModel->setData (frequencyModel->index(0,0), "cat");
-    frequencyModel->setData (frequencyModel->index(0,1), "56");
 
-    frequencyModel->setData (frequencyModel->index(1,0), "dog");
-    frequencyModel->setData (frequencyModel->index(1,1), "23");
-
-    frequencyModel->setData (frequencyModel->index(2,0), "par");
-    frequencyModel->setData (frequencyModel->index(2,1), "41");
-
-    frequencyModel->setData (frequencyModel->index(3,0), "cat2");
-    frequencyModel->setData (frequencyModel->index(3,1), "15");
-
-    frequencyModel->setData (frequencyModel->index(4,0), "dog2");
-    frequencyModel->setData (frequencyModel->index(4,1), "18");
-
-    frequencyModel->setData (frequencyModel->index(5,0), "par2");
-    frequencyModel->setData (frequencyModel->index(5,1), "1");
-
-    ui->debugTableView->setModel(frequencyModel);
+    ui->debugListView->setModel(frequencyModel);
 }
 
 //--------------------------------SLOTS implementation

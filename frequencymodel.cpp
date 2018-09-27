@@ -73,16 +73,21 @@ bool FrequencyModel::insertRows(int row, int count, QString &name, int clickCoun
     return true;
 }
 
-bool FrequencyModel::appendRow(const QString &name, const QModelIndex &parent = QModelIndex())
+bool FrequencyModel::appendRow(const QString &name, int clickCount, const QModelIndex &parent = QModelIndex())
 {
     (void) parent;
 
+    qDebug() << name << " " << clickCount;
     int row = activities.count();
-
+    qDebug() << row;
     beginInsertRows(QModelIndex(), row, row);
-    QPointer<Activity> p = new Activity(this, name);
-    activities.append(p);
+    activity *p = new activity;
+    qDebug() << "new activity";
+    p->name = name;
+    p->clickCount = clickCount;
 
+    activities.append(p);
+    qDebug() << "appended";
     endInsertRows();
 
     return true;
@@ -100,13 +105,13 @@ bool FrequencyModel::removeRows(int row, int count, const QModelIndex &parent = 
     return true;
 }
 
-QPointer<Activity> FrequencyModel::find(const QString& name) const
+activity* FrequencyModel::find(const QString& name) const
 {
     auto it = std::find_if(activities.begin(),
                            activities.end(),
-                           [name](QPointer<Activity> p)
+                           [name](activity* p)
                                 {
-                                    return name == p->getName();
+                                    return name == p->name;
                                 }
                            );
 
@@ -117,8 +122,8 @@ QVariant FrequencyModel::getIdx(const QString& name) const
 {
     for (int i = 0; i < activities.count(); ++i)
     {
-        qDebug() << i << ": " << activities.at(i)->getName();
-        if (activities.at(i)->getName() == name)
+        qDebug() << i << ": " << activities.at(i)->name;
+        if (activities.at(i)->name == name)
             return i + 1;//crutch for the outgoing check
     }
 

@@ -1,11 +1,13 @@
 #pragma once
 
+#include "frequencymodel.h"
 #include "activitylistmodel.h"
 #include "activity.h"
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QList>
 #include <QTimer>
+#include <QSortFilterProxyModel>
 
 namespace Ui {
 class MainWindow;
@@ -42,8 +44,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    QStandardItemModel *tableModel;
-    QStandardItemModel *frequencyModel;
+    QSortFilterProxyModel *proxyTableModel;
+    FrequencyModel *frequencyModel;
     ActivityListModel *listModel;
 
     QTimer *timer_1s;

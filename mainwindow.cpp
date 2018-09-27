@@ -13,6 +13,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    m_tableCollumnsCount = 4;
+    ui->activitiesTableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
     ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
     fillFrequencyTable();
@@ -22,8 +26,6 @@ MainWindow::MainWindow(QWidget *parent) :
     fillTable();
 
     listModel = new ActivityListModel(this);
-
-//    int x = this->height();
 
     ActivityListDelegate *del = new ActivityListDelegate(this);
     ui->currentActivitiesListView->setItemDelegate(del);
@@ -45,6 +47,14 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    ui->activitiesTableView->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+    ui->activitiesTableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    QMainWindow::resizeEvent(event);
 }
 
 void MainWindow::addActivity(const QString &cellText)
@@ -73,17 +83,15 @@ void MainWindow::fillTable()
 {
 //    qDebug() << "fillTable";
     int items = frequencyModel->rowCount();
-    int collumns = 4;
 
-    int rows = items / collumns + ((items % collumns) ? 1 : 0); // add whole number + 1 if there is something left
+    int rows = items / m_tableCollumnsCount + ((items % m_tableCollumnsCount) ? 1 : 0); // add whole number + 1 if there is something left
 
-    tableModel = new QStandardItemModel(rows, collumns, this);
+    tableModel = new QStandardItemModel(rows, m_tableCollumnsCount, this);
 
     for (int i = 0; i < rows; ++i)
-    {
-        for (int j = 0; j < collumns; ++j)
+        for (int j = 0; j < m_tableCollumnsCount; ++j)
         {
-            int filledCount = i * collumns + j;// number of items added
+            int filledCount = i * m_tableCollumnsCount + j;// number of items added
 
 //            qDebug() << i << "/" << j << " filledCount " << filledCount << " item " << frequencyModel->data(frequencyModel->index(filledCount, 0)).toString();
             if (filledCount < items)
@@ -95,7 +103,6 @@ void MainWindow::fillTable()
             else
                 tableModel->itemFromIndex(tableModel->index(i, j))->setFlags(Qt::NoItemFlags);//set item not active for user
         }
-    }
 
     ui->activitiesTableView->setModel(tableModel);
 }

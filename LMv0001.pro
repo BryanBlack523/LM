@@ -28,15 +28,13 @@ SOURCES += \
         mainwindow.cpp \
     activitylistdelegate.cpp \
     activitylistmodel.cpp \
-    activity.cpp \
-    frequencymodel.cpp
+    activity.cpp
 
 HEADERS += \
         mainwindow.h \
     activitylistdelegate.h \
     activitylistmodel.h \
-    activity.h \
-    frequencymodel.h
+    activity.h
 
 FORMS += \
         mainwindow.ui

@@ -16,13 +16,14 @@ public:
     explicit DataBase(QObject *parent = nullptr);
     ~DataBase();
 
-    bool saveActivity(const QVariantList &data);
+    bool insertActivity(const QVariantList &data);
     void connect();
     const QMap<QString, int> *getFrequency();
 
 private:
     QSqlDatabase db;
-    QString dbPath = "G:/Projects/LM/db/LMtest.db";
+//    QString dbPath = "G:/Projects/LM/db/LMtest.db";
+    QString dbPath = "D:/Projects/LM/db/LMtest.db";
 
     bool open();
     void close();

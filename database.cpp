@@ -71,7 +71,7 @@ const QMap<QString, int>* DataBase::getFrequency()
     return  result;
 }
 
-bool DataBase::saveActivity(const QVariantList &data)
+bool DataBase::insertActivity(const QVariantList &data)
 {
     QSqlQuery query;
 
@@ -80,7 +80,7 @@ bool DataBase::saveActivity(const QVariantList &data)
 
     query.bindValue(":BeginDate", data[0].toString());
     query.bindValue(":EndDate", data[1].toString());
-    query.bindValue(":ActivityID", data[1].toString());
+    query.bindValue(":ActivityID", data[2].toString());
 
     if (!query.exec())
     {

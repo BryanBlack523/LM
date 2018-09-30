@@ -44,19 +44,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timer_1h, SIGNAL(timeout()), this, SLOT(updateTable()));//refill table after 1h (to keep up with changes)
 
     timer_1h->start(10000);//1h 360000
+
+    connect(ui->currentActivitiesListView->model(), SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int&, int&)), this, SLOT(saveActivity()));
 }
 
 MainWindow::~MainWindow()
 {
-    int rows = listModel->rowCount();
-
-    for (int i = 0; i < rows; ++i)
-    {
-        QVariantList list;
-
-//        db.saveActivity()
-    }
-
     delete ui;
 }
 
@@ -96,6 +89,26 @@ void MainWindow::keyPressEvent(QKeyEvent* key)
         menu = new MenuWindow(this);
         menu->show();
     }
+}
+
+void MainWindow::saveActivity(const QModelIndex &index)
+{
+    if(listModel->data(index, ActivityListModel::ElapsedTime) >= 30000)
+    {
+        qDebug() << "inserting activity";
+        QVariantList data;
+
+        data.append(listModel->data(index, ActivityListModel::Name));
+
+        QDateTime beginDate = listModel->data(index, ActivityListModel::BeginDate).toDateTime();
+        QDateTime endDate = beginDate.addMSecs(listModel->data(index, ActivityListModel::ElapsedTime).toLongLong());
+
+        data.append(beginDate);
+        data.append(endDate);
+
+        db.insertActivity(data);
+    }
+
 }
 
 //-------------------------- initialise models

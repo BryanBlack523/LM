@@ -32,6 +32,7 @@ private slots:
     void updateTime();
     void updateTable();
     void keyPressEvent(QKeyEvent *key);
+    void saveActivity(const QModelIndex &);
 
     void on_TimeButton_clicked();
 

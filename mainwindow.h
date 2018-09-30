@@ -3,11 +3,13 @@
 #include "menuwindow.h"
 #include "activitylistmodel.h"
 #include "activity.h"
+#include "database.h"
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QList>
 #include <QTimer>
 #include <QKeyEvent>
+#include <QSqlQueryModel>
 
 namespace Ui {
 class MainWindow;
@@ -58,7 +60,8 @@ private:
     void addActivity(const QString&);
 
     void fillTable();
-    void fillFrequencyTable();
+    void fillFrequencyTable(const QMap<QString, int>*);
 
     int m_tableCollumnsCount;
+    DataBase db;
 };

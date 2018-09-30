@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -29,14 +29,16 @@ SOURCES += \
     activitylistdelegate.cpp \
     activitylistmodel.cpp \
     activity.cpp \
-    menuwindow.cpp
+    menuwindow.cpp \
+    database.cpp
 
 HEADERS += \
         mainwindow.h \
     activitylistdelegate.h \
     activitylistmodel.h \
     activity.h \
-    menuwindow.h
+    menuwindow.h \
+    database.h
 
 FORMS += \
         mainwindow.ui \

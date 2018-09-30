@@ -19,7 +19,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
-    fillFrequencyTable();
+    db.connect();
+
+    fillFrequencyTable(db.getFrequency());
 
     frequencyModel->sort(1, Qt::DescendingOrder);
 
@@ -46,6 +48,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    int rows = listModel->rowCount();
+
+    for (int i = 0; i < rows; ++i)
+    {
+        QVariantList list;
+
+//        db.saveActivity()
+    }
+
     delete ui;
 }
 
@@ -117,27 +128,19 @@ void MainWindow::fillTable()
     ui->activitiesTableView->setModel(tableModel);
 }
 
-void MainWindow::fillFrequencyTable()
+void MainWindow::fillFrequencyTable(const QMap<QString, int> *frequencyMap)
 {
-    frequencyModel = new QStandardItemModel(6,2,this);
+    frequencyModel = new QStandardItemModel(frequencyMap->size(),2,this);
 
-    frequencyModel->setData (frequencyModel->index(0,0), "cat");
-    frequencyModel->setData (frequencyModel->index(0,1), "56");
+    int iterator = 0;
 
-    frequencyModel->setData (frequencyModel->index(1,0), "dog");
-    frequencyModel->setData (frequencyModel->index(1,1), "23");
+    for (auto j : frequencyMap->keys())
+    {
+        frequencyModel->setData (frequencyModel->index(iterator,0), j);
+        frequencyModel->setData (frequencyModel->index(iterator,1), frequencyMap->value(j));
 
-    frequencyModel->setData (frequencyModel->index(2,0), "par");
-    frequencyModel->setData (frequencyModel->index(2,1), "41");
-
-    frequencyModel->setData (frequencyModel->index(3,0), "cat2");
-    frequencyModel->setData (frequencyModel->index(3,1), "15");
-
-    frequencyModel->setData (frequencyModel->index(4,0), "dog2");
-    frequencyModel->setData (frequencyModel->index(4,1), "18");
-
-    frequencyModel->setData (frequencyModel->index(5,0), "par2");
-    frequencyModel->setData (frequencyModel->index(5,1), "1");
+        ++iterator;
+    }
 
     ui->debugTableView->setModel(frequencyModel);
 }

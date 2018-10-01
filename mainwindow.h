@@ -30,9 +30,9 @@ private slots:
     void on_listActivityClicked(const QModelIndex &);
 
     void updateTime();
-    void updateTable();
+    void initTable();
     void keyPressEvent(QKeyEvent *key);
-    void saveActivity(const QModelIndex &);
+    void saveActivity(const QModelIndex &index, int, int);
 
     void on_TimeButton_clicked();
 
@@ -60,9 +60,9 @@ private:
     void deleteActivity(const QString&);
     void addActivity(const QString&);
 
-    void fillTable();
+    void fillTable(int rows, int items);
     void fillFrequencyTable(const QMap<QString, int>*);
 
-    int m_tableCollumnsCount;
+    int m_tableCollumnsCount = 4;
     DataBase db;
 };

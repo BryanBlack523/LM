@@ -6,8 +6,8 @@
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 
-#define DictActivity    "DictActivity"
-#define HistorySchedule    "HistorySchedule"
+#define DictActivity "DictActivity"
+#define HistorySchedule "HistorySchedule"
 
 class DataBase : public QObject
 {
@@ -19,11 +19,15 @@ public:
     bool insertActivity(const QVariantList &data);
     void connect();
     const QMap<QString, int> *getFrequency();
+    const QMap<QString, int> getActivityMap();
 
 private:
+
+    QMap<QString, int> activityMap;
+    void initActivityMap();
     QSqlDatabase db;
-//    QString dbPath = "G:/Projects/LM/db/LMtest.db";
-    QString dbPath = "D:/Projects/LM/db/LMtest.db";
+    QString dbPath = "G:/Projects/LM/db/LMtest.db";
+//    QString dbPath = "D:/Projects/LM/db/LMtest.db";
 
     bool open();
     void close();

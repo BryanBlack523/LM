@@ -28,7 +28,7 @@ QVariant ActivityListModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
     {
-        qDebug() << "index is not valid";
+        qDebug() << "ActivityListModel::data::\t\tindex is not valid";
         return QVariant();
     }
 
@@ -42,22 +42,6 @@ QVariant ActivityListModel::data(const QModelIndex &index, int role) const
 
     return QModelIndex();
 }
-
-//bool ActivityListModel::setData(const QModelIndex &index, const QVariant &value, int role)
-//{
-//    if (!index.isValid())
-//        return false;
-
-//    (void) value;
-
-//    switch (role)
-//    {
-////        case 1: activities[index.row()]->url = value.toString().toStdString(); return true;
-////        case 2: activities[index.row()]->hint = value.toString().toStdString(); return true;
-//    }
-
-//    return false;
-//}
 
 bool ActivityListModel::insertRows(int row, int count, QString &name, const QModelIndex &parent = QModelIndex())
 {
@@ -118,7 +102,6 @@ QVariant ActivityListModel::getIdx(const QString& name) const
 {
     for (int i = 0; i < activities.count(); ++i)
     {
-//        qDebug() << i << ": " << activities.at(i)->getName();
         if (activities.at(i)->getName() == name)
             return i + 1;//crutch for the outgoing check
     }

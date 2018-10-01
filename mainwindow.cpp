@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
+    connect(&db, SIGNAL(opened()), &db, SLOT(initDB()));
     db.connect();
 
     initTable();
@@ -31,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     timer_1s = new QTimer(this);
     timer_1h = new QTimer(this);
 
+    connect(listModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)), this, SLOT(saveActivity(const QModelIndex &, int, int)));
     connect(ui->activitiesTableView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_tableActivityClicked(const QModelIndex&)));
     connect(ui->currentActivitiesListView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_listActivityClicked(const QModelIndex&)));
     connect(timer_1s, SIGNAL(timeout()), this, SLOT(updateTime()));//emit dataChange to refresh elapsed time in real time, 1s period
@@ -40,9 +42,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timer_1h, SIGNAL(timeout()), this, SLOT(initTable()));//refill table after 1h (to keep up with changes)
 
     timer_1h->start(360000);//1h
-
-    connect(listModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)), this, SLOT(saveActivity(const QModelIndex &, int, int)));
-
 
 }
 

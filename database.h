@@ -8,7 +8,7 @@
 
 #define DictActivity "DictActivity"
 #define HistorySchedule "HistorySchedule"
-#define DailyActivity "DailyActivity"
+#define DailySchedule "DailySchedule"
 
 struct ScheduleData
 {
@@ -26,6 +26,8 @@ public:
 
     bool insertActivity(const QVariantList &data);
     bool insertActivity(QSqlQuery *insert, QSqlQuery *currQuery);
+    bool insertActivity(int id, QDateTime &begin, QDateTime &end);
+    bool insertActivity(int id, QDateTime &begin, QDateTime &end, QString table);
     void connect();
     const QMap<QString, int> *getFrequency();
     const QMap<QString, int> getActivityMap();
@@ -34,12 +36,15 @@ private:
 
     QMap<QString, int> activityMap;
     QSqlDatabase db;
-//    QString dbPath = "G:/Projects/LM/db/LMtest.db";
-    QString dbPath = "D:/Projects/LM/db/LMtest.db";
+    QString dbPath = "G:/Projects/LM/db/LMtest.db";
+//    QString dbPath = "D:/Projects/LM/db/LMtest.db";
 
-    void archiveActivityJob();
+    bool archiveActivityJob();
     bool wasArchived();
     void addEmptyActivity(QDateTime &prevEnd, QDateTime &currBegin);
+    bool diffDays(QDateTime &begin, QDateTime &end);
+    void separateDate(int id, QDateTime &begin, QDateTime &end);
+    bool clearDaily(QDateTime &date);
     QString findName(int id);
 
     bool open();

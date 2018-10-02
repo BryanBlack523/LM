@@ -46,6 +46,7 @@ void DataBase::initDB()
 {
     initActivityMap();
     archiveActivityJob();
+    clearDailySchedule();
 }
 
 const QMap<QString, int>* DataBase::getFrequency()
@@ -84,12 +85,12 @@ bool DataBase::archiveActivityJob()
 {
     if (!wasArchived())
     {
-        QSqlQuery currQuery("select " DailySchedule".ActivityId, " DailySchedule".BeginDate, " DailySchedule".EndDate from " DailySchedule"");
+        QSqlQuery currQuery("select ActivityId, BeginDate, EndDate from " DailySchedule" order by BeginDate");
 
         if(!currQuery.size())
             return false;
 
-        QSqlQuery lastDateQuery("select " HistorySchedule".EndDate from " HistorySchedule" order by ID desc limit 1");
+        QSqlQuery lastDateQuery("select BeginDate from " HistorySchedule" order by ScheduleID desc limit 1");
 
         QDateTime prevEndTime;
 
@@ -106,18 +107,12 @@ bool DataBase::archiveActivityJob()
             QDateTime currBeginTime = QDateTime::fromString(currQuery.value(1).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
 
             if(prevEndTime.secsTo(currBeginTime) > 0)
-            {
                 addEmptyActivity(prevEndTime, currBeginTime);
-            }
 
-            //внести разделение пустой активности на дни
             insertActivity(&insert, &currQuery);
 
             prevEndTime =  QDateTime::fromString(currQuery.value(2).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
         }
-
-
-
     }
     else
     {
@@ -164,12 +159,12 @@ void DataBase::addEmptyActivity(QDateTime &prevEnd, QDateTime &currBegin)
     insertActivity(data);
 }
 
-bool DataBase::diffDays(QDateTime &begin, QDateTime &end)
+bool DataBase::diffDays(const QDateTime &begin,const QDateTime &end)
 {
     return begin.daysTo(end) > 0 ? true : false;
 }
 
-void DataBase::separateDate(int id, QDateTime &begin, QDateTime &end)
+void DataBase::separateDate(const int id,const QDateTime &begin,const QDateTime &end)
 {
     QDateTime newEnd = begin;
     newEnd.setTime(QTime(23, 59, 59, 998));
@@ -181,9 +176,11 @@ void DataBase::separateDate(int id, QDateTime &begin, QDateTime &end)
     insertActivity(id, newBegin, end, DailySchedule);
 }
 
-bool DataBase::clearDaily(QDateTime &date)
+bool DataBase::clearDailySchedule()
 {
-    QSqlQuery truncate("delete from " DailySchedule" where date(BeginDate) = date (':Date')");
+    QDateTime date = QDateTime::currentDateTime();
+
+    QSqlQuery truncate("delete from " DailySchedule" where date(BeginDate) < date (':Date')");
 
     truncate.bindValue(":Date", date.toString("yyyy-MM-dd"));
 
@@ -225,6 +222,9 @@ void DataBase::initActivityMap()
 
 bool DataBase::insertActivity(const QVariantList &data)
 {
+    if (diffDays(data[1].toDateTime(), data[2].toDateTime()))
+        separateDate(activityMap[data[0].toString()], data[1].toDateTime(), data[2].toDateTime());
+
     QSqlQuery query;
 
     query.prepare("insert into " HistorySchedule" (BeginDate, EndDate, ActivityID)"
@@ -248,8 +248,11 @@ bool DataBase::insertActivity(const QVariantList &data)
     return false;
 }
 
-bool DataBase::insertActivity(int id, QDateTime &begin, QDateTime &end)
+bool DataBase::insertActivity(int id, const QDateTime &begin, const QDateTime &end)
 {
+    if (diffDays(begin, end))
+        separateDate(id, begin, end);
+
     QSqlQuery query;
 
     query.prepare("insert into " HistorySchedule" (BeginDate, EndDate, ActivityID)"
@@ -271,8 +274,11 @@ bool DataBase::insertActivity(int id, QDateTime &begin, QDateTime &end)
     return false;
 }
 
-bool DataBase::insertActivity(int id, QDateTime &begin, QDateTime &end, QString table)
+bool DataBase::insertActivity(int id, const QDateTime &begin, const QDateTime &end, QString table)
 {
+    if (diffDays(begin, end))
+        separateDate(id, begin, end);
+
     QSqlQuery query;
 
     query.prepare("insert into " + table + " (BeginDate, EndDate, ActivityID)"
@@ -296,6 +302,9 @@ bool DataBase::insertActivity(int id, QDateTime &begin, QDateTime &end, QString 
 
 bool DataBase::insertActivity(QSqlQuery *insert, QSqlQuery *currQuery)
 {
+    if (diffDays(currQuery->value(1).toDateTime(), currQuery->value(2).toDateTime()))
+        separateDate(currQuery->value(0).toInt(), currQuery->value(1).toDateTime(), currQuery->value(2).toDateTime());
+
     insert->bindValue(":ActivityID", currQuery->value(0).toInt());
     insert->bindValue(":BeginDate", currQuery->value(1).toString());
     insert->bindValue(":EndDate", currQuery->value(2).toString());

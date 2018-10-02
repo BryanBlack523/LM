@@ -26,8 +26,8 @@ public:
 
     bool insertActivity(const QVariantList &data);
     bool insertActivity(QSqlQuery *insert, QSqlQuery *currQuery);
-    bool insertActivity(int id, QDateTime &begin, QDateTime &end);
-    bool insertActivity(int id, QDateTime &begin, QDateTime &end, QString table);
+    bool insertActivity(int id, const QDateTime &begin, const QDateTime &end);
+    bool insertActivity(int id, const QDateTime &begin, const QDateTime &end, QString table);
     void connect();
     const QMap<QString, int> *getFrequency();
     const QMap<QString, int> getActivityMap();
@@ -42,8 +42,8 @@ private:
     bool archiveActivityJob();
     bool wasArchived();
     void addEmptyActivity(QDateTime &prevEnd, QDateTime &currBegin);
-    bool diffDays(QDateTime &begin, QDateTime &end);
-    void separateDate(int id, QDateTime &begin, QDateTime &end);
+    bool diffDays(const QDateTime &begin, const QDateTime &end);
+    void separateDate(const int id,const QDateTime &begin,const QDateTime &end);
     bool clearDaily(QDateTime &date);
     QString findName(int id);
 

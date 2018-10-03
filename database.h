@@ -10,13 +10,6 @@
 #define HistorySchedule "HistorySchedule"
 #define DailySchedule "DailySchedule"
 
-struct ScheduleData
-{
-    int id;
-    QString beginDate;
-    QString endDate;
-};
-
 class DataBase : public QObject
 {
     Q_OBJECT
@@ -25,7 +18,7 @@ public:
     ~DataBase();
 
     bool insertActivity(const QVariantList &data);
-    bool insertActivity(QSqlQuery *insert, QSqlQuery *currQuery);
+    bool insertActivity(QSqlQuery *insert, const QSqlQuery *currQuery);
     bool insertActivity(int id, const QDateTime &begin, const QDateTime &end);
     bool insertActivity(int id, const QDateTime &begin, const QDateTime &end, QString table);
     void connect();
@@ -39,12 +32,12 @@ private:
     QString dbPath = "G:/Projects/LM/db/LMtest.db";
 //    QString dbPath = "D:/Projects/LM/db/LMtest.db";
 
-    bool archiveActivityJob();
-    bool wasArchived();
-    void addEmptyActivity(QDateTime &prevEnd, QDateTime &currBegin);
+    void archiveActivityJob();
+    bool isArchived();
     bool diffDays(const QDateTime &begin, const QDateTime &end);
-    void separateDate(const int id,const QDateTime &begin,const QDateTime &end);
-    bool clearDaily(QDateTime &date);
+    void separateDate(const int id, const QDateTime &begin, const QDateTime &end);
+    void fillSpaces();
+    bool clearDailySchedule();
     QString findName(int id);
 
     bool open();

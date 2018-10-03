@@ -10,6 +10,7 @@ DataBase::DataBase(QObject *parent) : QObject(parent) {}
 
 DataBase::~DataBase() {}
 
+//-----------------------opening db
 void DataBase::connect()
 {
     if(!QFile(dbPath).exists())//":/db/db/LMtest.db"
@@ -37,17 +38,29 @@ bool DataBase::open()
     }
 }
 
+void DataBase::initDB()
+{
+    initActivityMap();
+
+    if (!isArchived())
+    {
+        qDebug() << "DataBase::initDB\t\t begin updating " HistorySchedule" ";
+        fillSpaces();
+        archiveActivityJob();
+        clearDailySchedule();
+    }
+    else
+    {
+        qDebug() << "DataBase::initDB\t\t " HistorySchedule" is up to date";
+    }
+}
+
 void DataBase::close()
 {
     db.close();
 }
 
-void DataBase::initDB()
-{
-    initActivityMap();
-    archiveActivityJob();
-    clearDailySchedule();
-}
+//------------------------------------getters
 
 const QMap<QString, int>* DataBase::getFrequency()
 {
@@ -81,103 +94,109 @@ const QMap<QString, int> DataBase::getActivityMap()
     return activityMap;
 }
 
-bool DataBase::archiveActivityJob()
+//----------------------------------------checks
+
+
+bool DataBase::isArchived()
 {
-    if (!wasArchived())
+    QSqlQuery currQuery("select BeginDate from " DailySchedule" order by BeginDate limit 1");
+
+    QDateTime date;
+
+    if(!currQuery.size())
     {
-        QSqlQuery currQuery("select ActivityId, BeginDate, EndDate from " DailySchedule" order by BeginDate");
-
-        if(!currQuery.size())
-            return false;
-
-        QSqlQuery lastDateQuery("select BeginDate from " HistorySchedule" order by ScheduleID desc limit 1");
-
-        QDateTime prevEndTime;
-
-        while (lastDateQuery.next())
-            prevEndTime = QDateTime::fromString(lastDateQuery.value(0).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
-
-        QSqlQuery insert;
-
-        insert.prepare("insert into " HistorySchedule" (ActivityID, BeginDate, EndDate)"
-                      "VALUES (:ActivityID, :BeginDate, :EndDate)");
-
-        while(currQuery.next())
-        {
-            QDateTime currBeginTime = QDateTime::fromString(currQuery.value(1).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
-
-            if(prevEndTime.secsTo(currBeginTime) > 0)
-                addEmptyActivity(prevEndTime, currBeginTime);
-
-            insertActivity(&insert, &currQuery);
-
-            prevEndTime =  QDateTime::fromString(currQuery.value(2).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
-        }
-    }
-    else
-    {
-        qDebug() << "DataBase::archiveActivityJob\t\t " HistorySchedule" is up to date";
+        qDebug() << "DataBase::isArchived\t\t " DailySchedule" is empty";
         return false;
     }
 
-    return false;
-}
-
-bool DataBase::wasArchived()
-{
-    QSqlQuery historyQuery("select EndDate from " HistorySchedule" order by ScheduleID desc limit 1");
-
-    QDateTime histEnd;
-
-    while (historyQuery.next())
-        histEnd = historyQuery.value(0).toDateTime();//QDateTime::fromString(historyQuery.value(0).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
-
-    QSqlQuery currQuery("select BeginDate from " DailySchedule" order by BeginDate limit 1");
-
-
-    QDateTime currEnd;
-
     while (currQuery.next())
-    {
-        currEnd = currQuery.value(0).toDateTime();//QDateTime::fromString(currQuery.value(0).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
-    }
+        date = currQuery.value(0).toDateTime();
 
-    if (histEnd.daysTo(currEnd) > 0)
+    qDebug() << "DataBase::isArchived\t\t first BeginDate is " << date;
+    if (date.daysTo(QDateTime::currentDateTime()) > 0)
         return false;
     else
         return true;
 }
 
-void DataBase::addEmptyActivity(QDateTime &prevEnd, QDateTime &currBegin)
+//----------------------------------------inits
+
+void DataBase::initActivityMap()
 {
-    QVariantList data;
+    QSqlQuery activities("select " DictActivity".Activity, " DictActivity".ActivityID from " DictActivity"");
 
-    data.append(0);
-    data.append(prevEnd);
-    data.append(currBegin);
+    while (activities.next())
+    {
+        QString name = activities.value(0).toString();
+        int id = activities.value(1).toInt();
 
-    insertActivity(data);
+        activityMap.insert(name, id);
+    }
 }
 
-bool DataBase::diffDays(const QDateTime &begin,const QDateTime &end)
+void DataBase::fillSpaces()
 {
-    return begin.daysTo(end) > 0 ? true : false;
+    qDebug() << "DataBase::fillSpaces\t\t";
+    QList<QVariantList> fillers;
+
+    QSqlQuery dailyQuery("select BeginDate, EndDate from " DailySchedule" order by BeginDate");
+
+    QSqlQuery lastDateQuery("select EndDate from " HistorySchedule" order by ScheduleID desc limit 1");
+
+    QDateTime prevEndTime;
+
+    while (lastDateQuery.next())// just for the sake of it check if last row in History is too far from first in Daily
+        prevEndTime = QDateTime::fromString(lastDateQuery.value(0).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
+
+    //first we will store in ram, then insert to avoid locks in db
+    while(dailyQuery.next())
+    {
+        QDateTime currBeginTime = QDateTime::fromString(dailyQuery.value(0).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
+
+        qDebug() << "fill?\t" << prevEndTime.toString("yyyy-MM-dd HH:mm:ss.zzz") << " " << (bool)(prevEndTime.secsTo(currBeginTime) > 0) << " " << currBeginTime.toString("yyyy-MM-dd HH:mm:ss.zzz");
+        if(prevEndTime.secsTo(currBeginTime) > 0)//find all spaces and record them
+        {
+            qDebug() << "\t fill it!";
+            QVariantList filler;
+
+            filler.append(0);
+            filler.append(prevEndTime);
+            filler.append(currBeginTime);
+        }
+        prevEndTime =  QDateTime::fromString(dailyQuery.value(0).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
+    }
+
+    // now insert them in table
+    for (QVariantList filler : fillers)
+    {
+        insertActivity(filler.value(0).toInt(), filler.value(1).toDateTime(), filler.value(2).toDateTime(), DailySchedule);
+    }
+    qDebug() << "DataBase::fillSpaces\t\t filled";
 }
 
-void DataBase::separateDate(const int id,const QDateTime &begin,const QDateTime &end)
+void DataBase::archiveActivityJob()
 {
-    QDateTime newEnd = begin;
-    newEnd.setTime(QTime(23, 59, 59, 998));
+    qDebug() << "DataBase::archiveActivityJob\t\t";
+    QSqlQuery currQuery("select ActivityId, BeginDate, EndDate from " DailySchedule" where date(BeginDate) < date (':Date') order by BeginDate");
+    QDateTime date = QDateTime::currentDateTime();
+    currQuery.bindValue(":Date", date.toString("yyyy-MM-dd"));
 
-    QDateTime newBegin = end;
-    newBegin.setTime(QTime(00, 00, 00, 001));
+    QSqlQuery insert;
 
-    insertActivity(id, begin, newEnd);
-    insertActivity(id, newBegin, end, DailySchedule);
+    insert.prepare("insert into " HistorySchedule" (ActivityID, BeginDate, EndDate)"
+                  "VALUES (:ActivityID, :BeginDate, :EndDate)");
+
+    while(currQuery.next())
+    {
+        qDebug() << "inserting " << currQuery.value(0).toInt() << " " << currQuery.value(1).toDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz") << " " << currQuery.value(2).toDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz");
+        insertActivity(&insert, &currQuery);
+    }
+    qDebug() << "DataBase::archiveActivityJob\t\t complete";
 }
 
 bool DataBase::clearDailySchedule()
 {
+    qDebug() << "DataBase::clearDailySchedule\t\t";
     QDateTime date = QDateTime::currentDateTime();
 
     QSqlQuery truncate("delete from " DailySchedule" where date(BeginDate) < date (':Date')");
@@ -196,29 +215,46 @@ bool DataBase::clearDailySchedule()
     return false;
 }
 
+//--------------------------------
+
 QString DataBase::findName(int id)
 {
-    for (auto it : activityMap.keys())
+    for (auto activityKey : activityMap.keys())
     {
-        if (activityMap.value(it) == id)
-            return it;
+        if (activityMap.value(activityKey) == id)
+            return activityKey;
     }
 
+    qDebug() << "DataBase::findName::\t\tcould not find name for id:" << id;
     return "";
 }
 
-void DataBase::initActivityMap()
+bool DataBase::diffDays(const QDateTime &begin,const QDateTime &end)
 {
-    QSqlQuery activities("select " DictActivity".Activity, " DictActivity".ActivityID from " DictActivity"");
-
-    while (activities.next())
-    {
-        QString name = activities.value(0).toString();
-        int id = activities.value(1).toInt();
-
-        activityMap.insert(name, id);
-    }
+    return begin.daysTo(end) > 0 ? true : false;
 }
+
+void DataBase::separateDate(const int id,const QDateTime &begin,const QDateTime &end)
+{
+    qDebug() << "DataBase::separateDate::\t\tcutting in half " << id << " " << begin.toString("yyyy-MM-dd HH:mm:ss.zzz") << " " << end.toString("yyyy-MM-dd HH:mm:ss.zzz");
+    QDateTime newEnd = begin;
+    newEnd.setTime(QTime(23, 59, 59, 998));
+
+    QDateTime newBegin = end;
+    newBegin.setTime(QTime(00, 00, 00, 001));
+
+    if (begin.daysTo(QDateTime::currentDateTime()) > 0)
+        insertActivity(id, begin, newEnd, HistorySchedule);
+    else
+        insertActivity(id, begin, newEnd, DailySchedule);
+
+    if (end.daysTo(QDateTime::currentDateTime()) > 0)
+        insertActivity(id, newBegin, end, HistorySchedule);
+    else
+        insertActivity(id, newBegin, end, DailySchedule);
+}
+
+//-----------------------inserters
 
 bool DataBase::insertActivity(const QVariantList &data)
 {
@@ -300,7 +336,7 @@ bool DataBase::insertActivity(int id, const QDateTime &begin, const QDateTime &e
     return false;
 }
 
-bool DataBase::insertActivity(QSqlQuery *insert, QSqlQuery *currQuery)
+bool DataBase::insertActivity(QSqlQuery *insert, const QSqlQuery *currQuery)
 {
     if (diffDays(currQuery->value(1).toDateTime(), currQuery->value(2).toDateTime()))
         separateDate(currQuery->value(0).toInt(), currQuery->value(1).toDateTime(), currQuery->value(2).toDateTime());
@@ -320,6 +356,3 @@ bool DataBase::insertActivity(QSqlQuery *insert, QSqlQuery *currQuery)
 
     return false;
 }
-
-
-

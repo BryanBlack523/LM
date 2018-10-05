@@ -29,8 +29,8 @@ private:
 
     QMap<QString, int> activityMap;
     QSqlDatabase db;
-    QString dbPath = "G:/Projects/LM/db/LMtest.db";
-//    QString dbPath = "D:/Projects/LM/db/LMtest.db";
+//    QString dbPath = "G:/Projects/LM/db/LMtest.db";
+    QString dbPath = "D:/Projects/LM/db/LMtest.db";
 
     void archiveActivityJob();
     bool isArchived();

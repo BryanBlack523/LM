@@ -112,7 +112,7 @@ bool DataBase::isArchived()
     while (currQuery.next())
         date = currQuery.value(0).toDateTime();
 
-    qDebug() << "DataBase::isArchived\t\t first BeginDate is " << date;
+    qDebug() << "DataBase::isArchived\t\t first BeginDate is " << date.toString("yyyy-MM-dd HH:mm:ss.zzz");
     if (date.daysTo(QDateTime::currentDateTime()) > 0)
         return false;
     else
@@ -146,30 +146,35 @@ void DataBase::fillSpaces()
     QDateTime prevEndTime;
 
     while (lastDateQuery.next())// just for the sake of it check if last row in History is too far from first in Daily
-        prevEndTime = QDateTime::fromString(lastDateQuery.value(0).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
+//        prevEndTime = QDateTime::fromString(lastDateQuery.value(0).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
+          prevEndTime = lastDateQuery.value(0).toDateTime();
+
+    qDebug() << prevEndTime.toString("yyyy-MM-dd HH:mm:ss.zzz");
 
     //first we will store in ram, then insert to avoid locks in db
     while(dailyQuery.next())
     {
-        QDateTime currBeginTime = QDateTime::fromString(dailyQuery.value(0).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
+        QDateTime currBeginTime = dailyQuery.value(0).toDateTime();
 
-        qDebug() << "fill?\t" << prevEndTime.toString("yyyy-MM-dd HH:mm:ss.zzz") << " " << (bool)(prevEndTime.secsTo(currBeginTime) > 0) << " " << currBeginTime.toString("yyyy-MM-dd HH:mm:ss.zzz");
+        qDebug() << prevEndTime.toString("yyyy-MM-dd HH:mm:ss.zzz") << " " << (char)((bool)(prevEndTime.secsTo(currBeginTime) > 0) ? '<' : '>') << " " << currBeginTime.toString("yyyy-MM-dd HH:mm:ss.zzz");
         if(prevEndTime.secsTo(currBeginTime) > 0)//find all spaces and record them
         {
-            qDebug() << "\t fill it!";
+//            qDebug() << "\t fill it!";
             QVariantList filler;
 
             filler.append(0);
             filler.append(prevEndTime);
             filler.append(currBeginTime);
+
+            fillers.append(filler);
         }
-        prevEndTime =  QDateTime::fromString(dailyQuery.value(0).toString(), "yyyy-MM-dd HH:mm:ss.zzz");
+        prevEndTime =  dailyQuery.value(1).toDateTime();
     }
 
     // now insert them in table
-    for (QVariantList filler : fillers)
+    for (int i = 0; i < fillers.size(); i++)
     {
-        insertActivity(filler.value(0).toInt(), filler.value(1).toDateTime(), filler.value(2).toDateTime(), DailySchedule);
+        insertActivity(fillers[i].value(0).toInt(), fillers[i].value(1).toDateTime(), fillers[i].value(2).toDateTime(), DailySchedule);
     }
     qDebug() << "DataBase::fillSpaces\t\t filled";
 }
@@ -177,12 +182,18 @@ void DataBase::fillSpaces()
 void DataBase::archiveActivityJob()
 {
     qDebug() << "DataBase::archiveActivityJob\t\t";
-    QSqlQuery currQuery("select ActivityId, BeginDate, EndDate from " DailySchedule" where date(BeginDate) < date (':Date') order by BeginDate");
+    QSqlQuery currQuery;
+    currQuery.prepare("select ActivityId, BeginDate, EndDate from " DailySchedule" where date(BeginDate) < date (:Date) order by BeginDate");
+
     QDateTime date = QDateTime::currentDateTime();
+
+    qDebug() << date.toString("yyyy-MM-dd");
     currQuery.bindValue(":Date", date.toString("yyyy-MM-dd"));
+    currQuery.exec();
+    qDebug() << currQuery.lastQuery();
+
 
     QSqlQuery insert;
-
     insert.prepare("insert into " HistorySchedule" (ActivityID, BeginDate, EndDate)"
                   "VALUES (:ActivityID, :BeginDate, :EndDate)");
 
@@ -199,7 +210,8 @@ bool DataBase::clearDailySchedule()
     qDebug() << "DataBase::clearDailySchedule\t\t";
     QDateTime date = QDateTime::currentDateTime();
 
-    QSqlQuery truncate("delete from " DailySchedule" where date(BeginDate) < date (':Date')");
+    QSqlQuery truncate;
+    truncate.prepare("delete from " DailySchedule" where date(BeginDate) < date (:Date)");
 
     truncate.bindValue(":Date", date.toString("yyyy-MM-dd"));
 
@@ -227,6 +239,34 @@ QString DataBase::findName(int id)
 
     qDebug() << "DataBase::findName::\t\tcould not find name for id:" << id;
     return "";
+}
+
+void DataBase::filled()
+{
+    QSqlQuery dailyQuery("select BeginDate, EndDate from " DailySchedule" order by BeginDate");
+
+    QList<QList<QDateTime>> matrix;
+
+    while(dailyQuery.next())
+    {
+        QDateTime begin = dailyQuery.value(0).toDateTime();
+        QDateTime end = dailyQuery.value(1).toDateTime();
+
+        for (auto checkList : matrix)
+        {
+            if ((checkList[0].secsTo(begin) > 0) && (checkList[1].secsTo(end)))
+            {
+
+            }
+        }
+
+        QList<QDateTime> t_list;
+
+        t_list.append(begin);
+        t_list.append(end);
+
+        matrix.append(t_list);
+    }
 }
 
 bool DataBase::diffDays(const QDateTime &begin,const QDateTime &end)
@@ -312,6 +352,7 @@ bool DataBase::insertActivity(int id, const QDateTime &begin, const QDateTime &e
 
 bool DataBase::insertActivity(int id, const QDateTime &begin, const QDateTime &end, QString table)
 {
+//    qDebug() << "DataBase::insertActivity::\t\t";
     if (diffDays(begin, end))
         separateDate(id, begin, end);
 

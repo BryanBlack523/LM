@@ -24,6 +24,7 @@ public:
     void connect();
     const QMap<QString, int> *getFrequency();
     const QMap<QString, int> getActivityMap();
+    void archiveJob();
 
 private:
 
@@ -32,10 +33,11 @@ private:
 //    QString dbPath = "G:/Projects/LM/db/LMtest.db";
     QString dbPath = "D:/Projects/LM/db/LMtest.db";
 
-    void archiveActivityJob();
+    void archiveActivities();
     bool isArchived();
     bool diffDays(const QDateTime &begin, const QDateTime &end);
     void separateDate(const int id, const QDateTime &begin, const QDateTime &end);
+    QList<QList<QDateTime> > getFilledTime();
     void fillSpaces();
     bool clearDailySchedule();
     QString findName(int id);

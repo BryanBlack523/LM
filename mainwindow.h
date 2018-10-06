@@ -31,6 +31,7 @@ private slots:
 
     void updateTime();
     void initTable();
+    void archive();
     void keyPressEvent(QKeyEvent *key);
     void saveActivity(const QModelIndex &index, int, int);
 
@@ -56,6 +57,9 @@ private:
 
     QTimer *timer_1s;
     QTimer *timer_1h;
+    QTimer *timer_1d;
+
+    QTime midnightTime;
 
     void deleteActivity(const QString&);
     void addActivity(const QString&);

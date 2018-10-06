@@ -43,6 +43,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     timer_1h->start(360000);//1h
 
+    qDebug() << "here";
+
+    connect(timer_1d, SIGNAL(timeout()), this, SLOT(archive()));
+
+//    midnightTime = QTime(23, 59, 59, 999);
+
+//    timer_1d->start(QTime::currentTime().msecsTo(midnightTime));
+    archive();
+
 }
 
 MainWindow::~MainWindow()
@@ -211,6 +220,14 @@ void MainWindow::initTable()
     //resize right after getting values
     QResizeEvent* resizeEvent = new QResizeEvent(this->size(), this->size());
     QCoreApplication::postEvent(this, resizeEvent);
+}
+
+void MainWindow::archive()
+{
+    qDebug() << "here";
+    db.archiveJob();
+
+    timer_1d->start(QTime::currentTime().secsTo(midnightTime));
 }
 
 //---------------------------Push Buttons SLOTS

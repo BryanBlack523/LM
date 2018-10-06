@@ -29,28 +29,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->currentActivitiesListView->setItemDelegate(del);
     ui->currentActivitiesListView->setModel(listModel);
 
-    timer_1s = new QTimer(this);
-    timer_1h = new QTimer(this);
-
     connect(listModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)), this, SLOT(saveActivity(const QModelIndex &, int, int)));
     connect(ui->activitiesTableView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_tableActivityClicked(const QModelIndex&)));
     connect(ui->currentActivitiesListView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_listActivityClicked(const QModelIndex&)));
-    connect(timer_1s, SIGNAL(timeout()), this, SLOT(updateTime()));//emit dataChange to refresh elapsed time in real time, 1s period
 
+    timer_1s = new QTimer(this);
+    timer_1h = new QTimer(this);
+    timer_1d = new QTimer(this);
+
+    connect(timer_1s, SIGNAL(timeout()), this, SLOT(updateTime()));//emit dataChange to refresh elapsed time in real time, 1s period
     timer_1s->start(1000);//1s
 
     connect(timer_1h, SIGNAL(timeout()), this, SLOT(initTable()));//refill table after 1h (to keep up with changes)
-
     timer_1h->start(360000);//1h
 
-    qDebug() << "here";
-
     connect(timer_1d, SIGNAL(timeout()), this, SLOT(archive()));
-
-//    midnightTime = QTime(23, 59, 59, 999);
-
-//    timer_1d->start(QTime::currentTime().msecsTo(midnightTime));
-    archive();
+    timer_1d->start(QTime::currentTime().msecsTo(QTime(23, 59, 59, 999)));
 
 }
 
@@ -102,19 +96,13 @@ void MainWindow::saveActivity(const QModelIndex &index, int first, int count)
     {
         QModelIndex idx = listModel->index(first + i, 0, index);
 
-        if(listModel->data(idx, ActivityListModel::ElapsedTime) >= 30000 || listModel->data(idx, ActivityListModel::Name) == "None")
+        if(listModel->data(idx, ActivityListModel::ElapsedTime) >= 30000)
         {
-            QVariantList data;
-
-            data.append(listModel->data(idx, ActivityListModel::Name));
-
+            int id = db.getActivityMap()[listModel->data(idx, ActivityListModel::Name).toString()];
             QDateTime beginDate = listModel->data(idx, ActivityListModel::BeginDate).toDateTime();
             QDateTime endDate = beginDate.addMSecs(listModel->data(idx, ActivityListModel::ElapsedTime).toLongLong());
 
-            data.append(beginDate);
-            data.append(endDate);
-
-            db.insertActivity(data);
+            db.insertActivity(id, beginDate, endDate, DailySchedule);
         }
     }
 
@@ -224,10 +212,9 @@ void MainWindow::initTable()
 
 void MainWindow::archive()
 {
-    qDebug() << "here";
     db.archiveJob();
 
-    timer_1d->start(QTime::currentTime().secsTo(midnightTime));
+    timer_1d->start(QTime::currentTime().msecsTo(QTime(23, 59, 59, 999)));
 }
 
 //---------------------------Push Buttons SLOTS

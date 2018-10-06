@@ -59,8 +59,6 @@ private:
     QTimer *timer_1h;
     QTimer *timer_1d;
 
-    QTime midnightTime;
-
     void deleteActivity(const QString&);
     void addActivity(const QString&);
 

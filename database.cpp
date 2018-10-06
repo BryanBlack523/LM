@@ -13,6 +13,15 @@ DataBase::~DataBase() {}
 //-----------------------opening db
 void DataBase::connect()
 {
+    if(QFile::exists("D:/Projects/LM/db/LMtest.db"))
+        dbPath = "D:/Projects/LM/db/LMtest.db";
+    else
+        dbPath = "G:/Projects/LM/db/LMtest.db";
+    qDebug() << "DataBase::connect::\tpath " << dbPath;
+
+    //    qDebug() << QApplication::applicationDirPath();
+    //    QFile::copy("/path/file", "/path/copy-of-file");
+
     if(!QFile(dbPath).exists())//":/db/db/LMtest.db"
         qDebug() << "DataBase::connect::\t\tDB path not found";
     else
@@ -39,23 +48,23 @@ bool DataBase::open()
 }
 
 void DataBase::initDB()
-{
+{//list of functions that will launch with app
     initActivityMap();
 
-    if (!isArchived())
-    {
-        qDebug() << "DataBase::initDB\t\t begin updating " HistorySchedule" ";
-        archiveJob();
-    }
-    else
-        qDebug() << "DataBase::initDB\t\t " HistorySchedule" is up to date";
+    archiveJob();
 }
 
 void DataBase::archiveJob()
 {
-    fillSpaces();
-    archiveActivities();
-    clearDailySchedule();
+    if (!isArchived())
+    {
+        qDebug() << "DataBase::archiveJob\t\t begin updating " HistorySchedule" ";
+        fillSpaces();
+        archiveActivities();
+        clearDailySchedule();
+    }
+    else
+        qDebug() << "DataBase::archiveJob\t\t " HistorySchedule" is up to date";
 }
 
 void DataBase::close()
@@ -89,6 +98,8 @@ const QMap<QString, int>* DataBase::getFrequency()
         result->insert(name, frequency);
     }
 
+    result->insert("None", 0);//special case - i do not want "None" activity to be in top... ever
+
     return  result;
 }
 
@@ -111,7 +122,7 @@ bool DataBase::isArchived()
 
     if ((date.daysTo(QDateTime::currentDateTime()) > 0) || (date.isValid()))
     {
-        qDebug() << "DataBase::isArchived\t\t first BeginDate is " << date;
+        qDebug() << "DataBase::isArchived\t\t first BeginDate is " << date.toString("yyyy-MM-dd HH:mm:ss.zzz");
         return false;
     }
     else
@@ -124,7 +135,7 @@ bool DataBase::isArchived()
 //----------------------------------------inits
 
 void DataBase::initActivityMap()
-{
+{//get all from DictionaryActivity
     QSqlQuery activities("select " DictActivity".Activity, " DictActivity".ActivityID from " DictActivity"");
 
     while (activities.next())
@@ -137,16 +148,22 @@ void DataBase::initActivityMap()
 }
 
 QList<QList<QDateTime>> DataBase::getFilledTime()
-{
-    qDebug() << "DataBase::filled::\t\t";
+{// apprehend all used dates in a single timeline
+    qDebug() << "DataBase::getFilledTime::\t\t";
 
-    QSqlQuery dailyQuery("select BeginDate, EndDate from " DailySchedule" order by BeginDate");
+    QSqlQuery dailyQuery;
+    dailyQuery.prepare("select BeginDate, EndDate from " DailySchedule" where date(BeginDate) < date (:Date) order by BeginDate");
+    QDateTime date = QDateTime::currentDateTime();
+
+    dailyQuery.bindValue(":Date", date.toString("yyyy-MM-dd"));
+    dailyQuery.exec();
+
     QSqlQuery lastDateQuery("select BeginDate, EndDate from " HistorySchedule" order by ScheduleID desc limit 1");
 
     QList<QList<QDateTime>> matrix;
 
     while (lastDateQuery.next())
-    {
+    {//initialise with last row from history table
         QDateTime begin = lastDateQuery.value(0).toDateTime();
         QDateTime end = lastDateQuery.value(1).toDateTime();
 
@@ -159,13 +176,13 @@ QList<QList<QDateTime>> DataBase::getFilledTime()
     }
 
     while(dailyQuery.next())
-    {
+    {//now check, if any of the data is between the dates that already were written
         QDateTime begin = dailyQuery.value(0).toDateTime();
         QDateTime end = dailyQuery.value(1).toDateTime();
 
 //        qDebug() << matrix.size() << " " << begin.toString("yyyy-MM-dd HH:mm:ss.zzz") << " " << end.toString("yyyy-MM-dd HH:mm:ss.zzz");
 
-        bool addFlag = true;
+        bool addFlag = true;//if date does not cross any of existing, append as new date
 
         for (int i = 0; i < matrix.size(); i++)
         {
@@ -199,23 +216,23 @@ QList<QList<QDateTime>> DataBase::getFilledTime()
 
         if (addFlag)
         {
+//            qDebug() << "create new";
+
             QList<QDateTime> newItem;
 
             newItem.append(begin);
             newItem.append(end);
 
             matrix.append(newItem);
-
-//            qDebug() << "create new";
         }
     }
 
-    qDebug() << "DataBase::filled::\tcomplete";
+    qDebug() << "DataBase::getFilledTime::\tcomplete";
     return matrix;
 }
 
 void DataBase::fillSpaces()
-{
+{// get the already filled times and fill in the gaps
     qDebug() << "DataBase::fillSpaces\t\t";
 
     QList<QList<QDateTime>> matrix = getFilledTime();
@@ -229,7 +246,7 @@ void DataBase::fillSpaces()
 
 void DataBase::archiveActivities()
 {
-    qDebug() << "DataBase::archiveActivityJob\t\t";
+    qDebug() << "DataBase::archiveActivities\t\t";
     QSqlQuery currQuery;
     currQuery.prepare("select ActivityId, BeginDate, EndDate from " DailySchedule" where date(BeginDate) < date (:Date) order by BeginDate");
 
@@ -249,7 +266,7 @@ void DataBase::archiveActivities()
 //        qDebug() << "inserting " << currQuery.value(0).toInt() << " " << currQuery.value(1).toDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz") << " " << currQuery.value(2).toDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz");
         insertActivity(&insert, &currQuery);
     }
-    qDebug() << "DataBase::archiveActivityJob\t\t complete";
+    qDebug() << "DataBase::archiveActivities\t\t complete";
 }
 
 bool DataBase::clearDailySchedule()
@@ -399,7 +416,7 @@ bool DataBase::insertActivity(int id, const QDateTime &begin, const QDateTime &e
 }
 
 bool DataBase::insertActivity(QSqlQuery *insert, const QSqlQuery *currQuery)
-{
+{// i really don't know why i made this function... but why the fuck not?
     if (diffDays(currQuery->value(1).toDateTime(), currQuery->value(2).toDateTime()))
         separateDate(currQuery->value(0).toInt(), currQuery->value(1).toDateTime(), currQuery->value(2).toDateTime());
 

@@ -21,7 +21,7 @@ public:
     bool insertActivity(QSqlQuery *insert, const QSqlQuery *currQuery);
     bool insertActivity(int id, const QDateTime &begin, const QDateTime &end);
     bool insertActivity(int id, const QDateTime &begin, const QDateTime &end, QString table);
-    void connect();
+    void connect(const QString &dbPath);
     const QMap<QString, int> *getFrequency();
     const QMap<QString, int> getActivityMap();
     void archiveJob();
@@ -30,7 +30,7 @@ private:
 
     QMap<QString, int> activityMap;
     QSqlDatabase db;
-    QString dbPath = "G:/Projects/LM/db/LMtest.db";
+//    QString dbPath = "G:/Projects/LM/db/LMtest.db";
 //    QString dbPath = "D:/Projects/LM/db/LMtest.db";
 
     void archiveActivities();
@@ -42,7 +42,7 @@ private:
     bool clearDailySchedule();
     QString findName(int id);
 
-    bool open();
+    bool open(const QString &dbPath);
     void close();
     void initActivityMap();
 

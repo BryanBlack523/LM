@@ -11,24 +11,15 @@ DataBase::DataBase(QObject *parent) : QObject(parent) {}
 DataBase::~DataBase() {}
 
 //-----------------------opening db
-void DataBase::connect()
+void DataBase::connect(const QString &dbPath)
 {
-    if(QFile::exists("D:/Projects/LM/db/LMtest.db"))
-        dbPath = "D:/Projects/LM/db/LMtest.db";
-    else
-        dbPath = "G:/Projects/LM/db/LMtest.db";
-    qDebug() << "DataBase::connect::\tpath " << dbPath;
-
-    //    qDebug() << QApplication::applicationDirPath();
-    //    QFile::copy("/path/file", "/path/copy-of-file");
-
     if(!QFile(dbPath).exists())//":/db/db/LMtest.db"
         qDebug() << "DataBase::connect::\t\tDB path not found";
     else
-        this->open();
+        this->open(dbPath);
 }
 
-bool DataBase::open()
+bool DataBase::open(const QString &dbPath)
 {
     db = QSqlDatabase::addDatabase("QSQLITE");
 //    db.setHostName("LMtest");

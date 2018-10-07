@@ -61,6 +61,7 @@ private:
 
     void deleteActivity(const QString&);
     void addActivity(const QString&);
+    QString getDbPath();
 
     void fillTable(int rows, int items);
     void fillFrequencyTable(const QMap<QString, int>*);

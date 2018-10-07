@@ -6,6 +6,7 @@
 #include <QString>
 #include <QErrorMessage>
 #include <QDebug>
+#include <QDir>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -19,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
     connect(&db, SIGNAL(opened()), &db, SLOT(initDB()));
-    db.connect();
+    db.connect(getDbPath());
 
     initTable();
 
@@ -51,6 +52,19 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+
+QString MainWindow::getDbPath()
+{
+    QDir dbPath = QApplication::applicationDirPath();
+
+    dbPath.cdUp();
+    dbPath.cdUp();
+
+    dbPath.setPath(dbPath.path() + "/LM/db/LMtest.db");
+
+    return dbPath.path();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

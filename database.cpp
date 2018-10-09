@@ -41,6 +41,7 @@ bool DataBase::open(const QString &dbPath)
 void DataBase::initDB()
 {//list of functions that will launch with app
     initActivityMap();
+    initFrequency();
 
     archiveJob();
 }
@@ -53,6 +54,7 @@ void DataBase::archiveJob()
         fillSpaces();
         archiveActivities();
         clearDailySchedule();
+        initFrequency();
     }
     else
         qDebug() << "DataBase::archiveJob\t\t " HistorySchedule" is up to date";
@@ -65,32 +67,67 @@ void DataBase::close()
 
 //------------------------------------getters
 
+int DataBase::setFrequency(int id)
+{
+//    qDebug() << "DataBase::setFrequency::\t" << id;
+    int frequency = 0;
+
+    QSqlQuery query;
+    query.prepare("select count(ActivityID) from " HistorySchedule" where ActivityID = :id and date(BeginDate) > date('now', '-31 day')");
+
+    query.bindValue(":id", id);
+    query.exec();
+
+    while (query.next())
+        frequency = query.value(0).toInt();
+
+    QSqlQuery update;
+    update.prepare("update " DictActivity" set Frequency = :frequency where ActivityID = :id");
+    update.bindValue(":frequency", frequency);
+    update.bindValue(":id", id);
+    if (!update.exec())
+    {
+        qDebug() << "DataBase::setFrequency::\t\tcould not update " << id << " new frequency is " << frequency;
+        qDebug() << update.lastError().text();
+    }
+
+    return frequency;
+}
+
+void DataBase::initFrequency()
+{
+    qDebug() << "DataBase::initFrequency::\t";
+    QSqlQuery activities("select ActivityID from " DictActivity"");
+
+    while(activities.next())
+        setFrequency(activities.value(0).toInt());
+    qDebug() << "DataBase::initFrequency::\t";
+}
+
 const QMap<QString, int>* DataBase::getFrequency()
 {
-    //because SQLight does not have RIGHT JOIN, hence a crutch:
-    //first get all Activity names and shove it in map
+    qDebug() << "DataBase::getFrequency::\t";
+    QSqlQuery query("select Activity, Frequency, ActivityID from " DictActivity"");
 
     QMap<QString, int>* result = new QMap<QString, int>;
 
-    for (auto it : activityMap.keys())
-        result->insert(it, 0);
-
-    // then get frequency data from here
-    QSqlQuery query("select " DictActivity".Activity, count(" HistorySchedule".ActivityID) as Frequency"
-                    " from " HistorySchedule""
-                    " join " DictActivity" on " DictActivity".ActivityID = " HistorySchedule".ActivityID"
-                    " group by " HistorySchedule".ActivityID");
-
     while (query.next())
     {
+        int frequency;
+
+        if (query.isNull(1))
+            frequency = setFrequency(query.value(2).toInt());
+        else
+            frequency = query.value(1).toInt();
+
         QString name = query.value(0).toString();
-        int frequency = query.value(1).toInt();
 
         result->insert(name, frequency);
     }
 
     result->insert("None", 0);//special case - i do not want "None" activity to be in top... ever
 
+    qDebug() << "DataBase::getFrequency::\t";
     return  result;
 }
 
@@ -138,16 +175,14 @@ void DataBase::initActivityMap()
     }
 }
 
+
+
 QList<QList<QDateTime>> DataBase::getFilledTime()
 {// apprehend all used dates in a single timeline
     qDebug() << "DataBase::getFilledTime::\t\t";
 
-    QSqlQuery dailyQuery;
-    dailyQuery.prepare("select BeginDate, EndDate from " DailySchedule" where date(BeginDate) < date (:Date) order by BeginDate");
-    QDateTime date = QDateTime::currentDateTime();
+    QSqlQuery dailyQuery("select BeginDate, EndDate from " DailySchedule" where date(BeginDate) < date ('now') order by BeginDate");
 
-    dailyQuery.bindValue(":Date", date.toString("yyyy-MM-dd"));
-    dailyQuery.exec();
 
     QSqlQuery lastDateQuery("select BeginDate, EndDate from " HistorySchedule" order by ScheduleID desc limit 1");
 
@@ -238,15 +273,7 @@ void DataBase::fillSpaces()
 void DataBase::archiveActivities()
 {
     qDebug() << "DataBase::archiveActivities\t\t";
-    QSqlQuery currQuery;
-    currQuery.prepare("select ActivityId, BeginDate, EndDate from " DailySchedule" where date(BeginDate) < date (:Date) order by BeginDate");
-
-    QDateTime date = QDateTime::currentDateTime();
-
-//    qDebug() << date.toString("yyyy-MM-dd");
-    currQuery.bindValue(":Date", date.toString("yyyy-MM-dd"));
-    currQuery.exec();
-//    qDebug() << currQuery.lastQuery();
+    QSqlQuery currQuery("select ActivityId, BeginDate, EndDate from " DailySchedule" where date(BeginDate) < date ('now') order by BeginDate");
 
     QSqlQuery insert;
     insert.prepare("insert into " HistorySchedule" (ActivityID, BeginDate, EndDate)"
@@ -265,10 +292,7 @@ bool DataBase::clearDailySchedule()
     qDebug() << "DataBase::clearDailySchedule\t\t";
     QDateTime date = QDateTime::currentDateTime();
 
-    QSqlQuery truncate;
-    truncate.prepare("delete from " DailySchedule" where date(BeginDate) < date (:Date)");
-
-    truncate.bindValue(":Date", date.toString("yyyy-MM-dd"));
+    QSqlQuery truncate("delete from " DailySchedule" where date(BeginDate) < date ('now')");
 
     if (!truncate.exec())
     {

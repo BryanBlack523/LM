@@ -45,6 +45,8 @@ private:
     bool open(const QString &dbPath);
     void close();
     void initActivityMap();
+    int setFrequency(int id);
+    void initFrequency();
 
 
 signals:

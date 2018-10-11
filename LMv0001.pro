@@ -30,7 +30,8 @@ SOURCES += \
     activitylistmodel.cpp \
     activity.cpp \
     menuwindow.cpp \
-    database.cpp
+    database.cpp \
+    importtool.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,7 +39,8 @@ HEADERS += \
     activitylistmodel.h \
     activity.h \
     menuwindow.h \
-    database.h
+    database.h \
+    importtool.h
 
 FORMS += \
         mainwindow.ui \

@@ -57,14 +57,24 @@ MainWindow::~MainWindow()
 
 QString MainWindow::getDbPath()
 {
-    QDir dbPath = QApplication::applicationDirPath();
+    QDir resultPath = QApplication::applicationDirPath() + "/data/LMtest.db";
 
-    dbPath.cdUp();
-    dbPath.cdUp();
+    QFile dataFile(resultPath.path());
+    QFile resFile(":/data/db/LMtest.db");
 
-    dbPath.setPath(dbPath.path() + "/LM/db/LMtest.db");
+    QFileInfo dataFileInf(dataFile);
+    QFileInfo resFileInf(resFile);
 
-    return dbPath.path();
+    if (!dataFile.exists() && dataFileInf.lastModified() < resFileInf.lastModified())
+    {
+        QDir newPath = QApplication::applicationDirPath();
+        newPath.mkdir("data");
+
+        resFile.copy(resultPath.path());
+        QFile::setPermissions(resultPath.path(), QFile::WriteOwner | QFile::ReadOwner);
+    }
+
+    return  resultPath.path();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

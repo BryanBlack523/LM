@@ -2,4 +2,8 @@
     <qresource prefix="/resources">
         <file>icons/monkey_off_32x32.png</file>
     </qresource>
+    <qresource prefix="/data">
+        <file>db/LMtest - копия.db</file>
+        <file>db/LMtest.db</file>
+    </qresource>
 </RCC>

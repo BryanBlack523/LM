@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QDebug>
+#include <QDateTime>
 
 MenuWindow::MenuWindow(QWidget *parent, DataBase *database) :
     QDialog(parent),
@@ -26,10 +27,18 @@ void MenuWindow::on_importButton_clicked()
                                                   "",
                                                   tr("Files (*.txt, *csv)")));
     QFileInfo inf(importFile);
-    qDebug() << inf.path();
+    qDebug() << inf.filePath();
 
-    ImportTool tool(this, inf.path());
+    ImportTool tool(this, inf.filePath());
     tool.read();
     tool.parse();
+    tool.convertDate();
+
+    for (int i = 0; i < tool.getSize(); ++i)
+    {
+        QList<QString> entry = tool.getEntry(i);
+        int id = db->findId(entry[2]);
+        db->insertActivity(id, QDateTime::fromString(entry[0], "yyyy-MM-dd HH:mm:ss.zzz"), QDateTime::fromString(entry[1], "yyyy-MM-dd HH:mm:ss.zzz"), DailySchedule);
+    }
 
 }

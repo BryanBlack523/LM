@@ -320,7 +320,17 @@ QString DataBase::findName(int id)
     return "";
 }
 
+int DataBase::findId(QString &name)
+{
+    for (auto activityKey : activityMap.keys())
+    {
+        if (activityKey == name)
+            return activityMap.value(activityKey);
+    }
 
+    qDebug() << "DataBase::findId::\t\tcould not find id for name:" << name;
+    return 0;
+}
 
 bool DataBase::diffDays(const QDateTime &begin,const QDateTime &end)
 {

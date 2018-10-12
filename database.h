@@ -25,6 +25,8 @@ public:
     const QMap<QString, int> *getFrequency();
     const QMap<QString, int> getActivityMap();
     void archiveJob();
+    QString findName(int id);
+    int findId(QString &name);
 
 private:
 
@@ -40,7 +42,6 @@ private:
     QList<QList<QDateTime> > getFilledTime();
     void fillSpaces();
     bool clearDailySchedule();
-    QString findName(int id);
 
     bool open(const QString &dbPath);
     void close();

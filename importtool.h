@@ -14,10 +14,14 @@ public:
 
     void read();
     void parse();
+    void convertDate();
+    QList<QString> getEntry(int row);
+    int getSize();
 
 private:
     QFileInfo fileInfo;
     QList<QString> lines;
+    QList<QList<QString>> parsedList;
 signals:
 
 public slots:

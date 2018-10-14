@@ -7,6 +7,7 @@
 #include <QErrorMessage>
 #include <QDebug>
 #include <QDir>
+#include <QStandardPaths>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -57,24 +58,28 @@ MainWindow::~MainWindow()
 
 QString MainWindow::getDbPath()
 {
-    QDir resultPath = QApplication::applicationDirPath() + "/data/LMtest.db";
+    QDir resultPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/data/";
 
-    QFile dataFile(resultPath.path());
+    QFile dataFile(resultPath.filePath("LMtest.db"));
     QFile resFile(":/data/db/LMtest.db");
 
     QFileInfo dataFileInf(dataFile);
     QFileInfo resFileInf(resFile);
+//    qDebug() << "should be:" << resultPath.filePath("LMtest.db");
+//    qDebug() << "qrs: " << resFileInf.filePath();
 
     if (!dataFile.exists() && dataFileInf.lastModified() < resFileInf.lastModified())
     {
-        QDir newPath = QApplication::applicationDirPath();
+//        qDebug() << "create one!";
+//        QDir newPath = QApplication::applicationDirPath();
+        QDir newPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
         newPath.mkdir("data");
 
-        resFile.copy(resultPath.path());
-        QFile::setPermissions(resultPath.path(), QFile::WriteOwner | QFile::ReadOwner);
+        resFile.copy(resultPath.filePath("LMtest.db"));
+        QFile::setPermissions(resultPath.filePath("LMtest.db"), QFile::WriteOwner | QFile::ReadOwner);
     }
 
-    return  resultPath.path();
+    return  resultPath.filePath("LMtest.db");
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

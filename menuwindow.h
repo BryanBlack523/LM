@@ -13,7 +13,7 @@ class MenuWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit MenuWindow(QWidget *parent = nullptr, DataBase *database = nullptr);
+    explicit MenuWindow(QWidget *parent = nullptr, const QString &dbPath = QString());
     ~MenuWindow();
 
 private slots:
@@ -21,7 +21,7 @@ private slots:
 
 private:
     Ui::MenuWindow *ui;
-    DataBase *db;
+    DataBase db;
 };
 
 #endif // MENUWINDOW_H

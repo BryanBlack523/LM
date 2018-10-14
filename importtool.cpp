@@ -36,18 +36,19 @@ void ImportTool::read()
 
 void ImportTool::parse()
 {
-    qDebug() << "parse";
     for (auto line : lines)
     {
         QStringList temp = line.split(',');
 
-        if (temp[0] != 1)
+        if (temp[0] != "RECORD ID")
         {
             QList<QString> entry;
 
             entry.append(temp[1]);//start dt
             entry.append(temp[3]);//duration
             entry.append(temp[5]);//activity name
+
+//            qDebug() << ":" << entry.at(0) << " " << entry.at(1) << " " << entry.at(2);
 
             parsedList.append(entry);
         }
@@ -58,7 +59,20 @@ void ImportTool::convertDate()
 {
     for (int i = 0; i < parsedList.size(); ++i)
     {
-        QDateTime stamp = QDateTime::fromString(parsedList[i].at(0), "dd MMM yyyy HH:mm");//28 Apr 2018 20:20
+        QString sDate = parsedList[i].at(0).left(11);
+        QString sTime = parsedList[i].at(0).right(5);
+
+        QLocale curLocale(QLocale("en_EN"));
+        QLocale::setDefault(curLocale);
+
+        QDate Date = QLocale().toDate(sDate, "dd MMM yyyy");//QDate::fromString(sDate, "dd MMM yyyy");
+        QTime Time = QTime::fromString(sTime, "HH:mm");
+//        qDebug() << parsedList[i].at(0) << sDate << " " << sTime << " vs " << Date << " " << Time;
+
+        QDateTime stamp;
+        stamp.setDate(Date);
+        stamp.setTime(Time);
+
         QTime duration = QTime::fromString(parsedList[i].at(1), "HH:mm:ss");
 
         qint64 secs = (duration.hour()*60 + duration.minute())*60 + duration.second();

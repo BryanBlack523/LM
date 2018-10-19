@@ -9,12 +9,12 @@ ActivityListModel::ActivityListModel(QObject *parent)
 
 ActivityListModel::~ActivityListModel()
 {
-    qDeleteAll(activities);
+    activities.clear();
 }
 
 int ActivityListModel::rowCount(const QModelIndex&) const
 {
-    return activities.count();
+    return activities.size();
 }
 
 int ActivityListModel::columnCount(const QModelIndex&) const
@@ -37,78 +37,74 @@ QVariant ActivityListModel::data(const QModelIndex &index, int role) const
 
     switch (role)
     {
-        case Name: return activities[index.row()]->getName();
-        case BeginDate: return activities[index.row()]->getBeginDate();
-        case ElapsedTime: return activities[index.row()]->getElapsedTime();
+        case Name: return activities[index.row()]->name;
+        case BeginDate: return activities[index.row()]->beginDate;
+        case ElapsedTime: return activities[index.row()]->elapsedTime();
         case Qt::SizeHintRole: return QSize(70, 70);
     }
 
     return QModelIndex();
 }
 
-bool ActivityListModel::insertRows(int row, int count, QString &name, const QModelIndex &parent = QModelIndex())
+bool ActivityListModel::insertRows(int row, int count, QString &name, const QModelIndex &)
 {
-    (void) parent;
-
     beginInsertRows(QModelIndex(), row, row + count - 1);
+
     for (int i = row; i < row + count; ++ i)
-    {
-        QPointer<Activity> p = new Activity (this, name);
-        activities.append(p);
-    }
+        activities.push_back(std::make_shared<Activity>(name));
+
     endInsertRows();
 
     return true;
 }
 
-bool ActivityListModel::appendRow(const QString &name, const QModelIndex &parent = QModelIndex())
+bool ActivityListModel::appendRow(const QString &name, const QModelIndex&)
 {
-    (void) parent;
-
-    int row = activities.count();
+    int row = activities.size();
 
     beginInsertRows(QModelIndex(), row, row);
-    QPointer<Activity> p = new Activity(this, name);
-    activities.append(p);
+
+    activities.push_back(std::make_shared<Activity>(name));
 
     endInsertRows();
 
     return true;
 }
 
-bool ActivityListModel::removeRows(int row, int count, const QModelIndex &parent = QModelIndex())
+bool ActivityListModel::removeRows(int row, int count, const QModelIndex&)
 {
-    (void) parent;
-
     beginRemoveRows(QModelIndex(), row, row + count - 1);
-    while (count--)
-        delete activities.takeAt(row);
+
+    activities.erase(activities.begin() + row, activities.begin() + row + count); // TODO: check that
+
     endRemoveRows();
 
     return true;
 }
 
-QPointer<Activity> ActivityListModel::find(const QString& name) const
+std::shared_ptr<Activity> ActivityListModel::find(const QString& name) const
 {
     auto it = std::find_if(activities.begin(),
                            activities.end(),
-                           [name](QPointer<Activity> p)
+                           [name](const std::shared_ptr<Activity>& p)
                                 {
-                                    return name == p->getName();
+                                    return name == p->name;
                                 }
                            );
 
     return it == activities.end() ? nullptr : *it;
 }
 
-QVariant ActivityListModel::getIdx(const QString& name) const
+int ActivityListModel::getIdx(const QString& name) const
 {
-    for (int i = 0; i < activities.count(); ++i)
-    {
-        if (activities.at(i)->getName() == name)
-            return i + 1;//crutch for the outgoing check
-    }
+    auto it = std::find_if(activities.begin(),
+                           activities.end(),
+                           [name](const std::shared_ptr<Activity>& p)
+                                {
+                                    return name == p->name;
+                                }
+                           );
 
-    return false;
+    return it == activities.end() ? -1 : it - activities.begin();
 }
 

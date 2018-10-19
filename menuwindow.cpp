@@ -9,7 +9,7 @@
 #include "importtool.h"
 #include "ui_menuwindow.h"
 
-MenuWindow::MenuWindow(DataBase *db, QWidget *parent)
+MenuWindow::MenuWindow(std::shared_ptr<DataBase> db, QWidget *parent)
   : QDialog(parent)
   , m_ui(new Ui::MenuWindow)
   , m_db(db)
@@ -39,7 +39,9 @@ void MenuWindow::on_importButton_clicked()
     {
         QList<QString> entry = tool.getEntry(i);
         int id = m_db->findId(entry[2]);
-        m_db->insertActivity(id, QDateTime::fromString(entry[0], "yyyy-MM-dd HH:mm:ss.zzz"), QDateTime::fromString(entry[1], "yyyy-MM-dd HH:mm:ss.zzz"), DailySchedule);
+        m_db->insertActivityDaily(id,
+                                  QDateTime::fromString(entry[0], "yyyy-MM-dd HH:mm:ss.zzz"),
+                                  QDateTime::fromString(entry[1], "yyyy-MM-dd HH:mm:ss.zzz"));
     }
 
 }

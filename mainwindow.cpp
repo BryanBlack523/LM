@@ -30,8 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
-    connect(m_db, SIGNAL(opened()), m_db, SLOT(initDB()));
-    m_db->connect(getDbPath());
+    m_db->open(getDbPath());
 
     initTable();
 
@@ -63,7 +62,6 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete m_ui;
-    delete m_db;
 }
 
 QString MainWindow::getDbPath()
@@ -109,15 +107,12 @@ void MainWindow::addActivity(const QString &cellText)
 
 void MainWindow::deleteActivity(const QString &cellText)
 {
-    QVariant row = m_listModel->getIdx(cellText);
+    int row = m_listModel->getIdx(cellText);
 
-    if (!row.toBool())
+    if (row == -1)
         qDebug() << "MainWindow::deleteActivity\t\tFailed to get Idx of " << cellText;
     else
-    {
-        row = row.toInt() - 1; // why? check ActivityListModel::getIdx()
-        m_listModel->removeRows(row.toInt(), 1, QModelIndex());
-    }
+        m_listModel->removeRows(row, 1, QModelIndex());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* key)
@@ -141,7 +136,7 @@ void MainWindow::saveActivity(const QModelIndex &index, int first, int count)
             QDateTime beginDate = m_listModel->data(idx, ActivityListModel::BeginDate).toDateTime();
             QDateTime endDate = beginDate.addMSecs(m_listModel->data(idx, ActivityListModel::ElapsedTime).toLongLong());
 
-            m_db->insertActivity(id, beginDate, endDate, DailySchedule);
+            m_db->insertActivityDaily(id, beginDate, endDate);
         }
     }
 
@@ -168,16 +163,16 @@ void MainWindow::fillTable(int rows, int items)
         }
 }
 
-void MainWindow::fillFrequencyTable(const QMap<QString, int> *frequencyMap)
+void MainWindow::fillFrequencyTable(const QMap<QString, int>& frequencyMap)
 {
-    m_frequencyModel = new QStandardItemModel(frequencyMap->size(),2,this);
+    m_frequencyModel = new QStandardItemModel(frequencyMap.size(),2,this);
 
     int row = 0;
 
-    for (auto key : frequencyMap->keys())
+    for (auto key : frequencyMap.keys())
     {
         m_frequencyModel->setData (m_frequencyModel->index(row,0), key);
-        m_frequencyModel->setData (m_frequencyModel->index(row,1), frequencyMap->value(key));
+        m_frequencyModel->setData (m_frequencyModel->index(row,1), frequencyMap.value(key));
 
         ++row;
     }
@@ -228,7 +223,9 @@ void MainWindow::updateTime()
 
 void MainWindow::initTable()
 {
-    fillFrequencyTable(m_db->getFrequency());
+    QMap<QString, int> frequency;
+    m_db->getFrequency(frequency);
+    fillFrequencyTable(frequency);
 
     m_frequencyModel->sort(1,  Qt::DescendingOrder);
 

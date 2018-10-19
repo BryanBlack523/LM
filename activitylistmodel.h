@@ -1,8 +1,12 @@
 #pragma once
 
 #include <QAbstractItemModel>
-#include <activity.h>
 #include <QPointer>
+
+#include <list>
+#include <memory>
+
+#include "activity.h"
 
 class ActivityListModel
   : public QAbstractListModel
@@ -38,13 +42,13 @@ public:
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
-    QPointer<Activity> find(const QString& name) const;
-    QVariant getIdx(const QString& name) const;
+    std::shared_ptr<Activity> find(const QString& name) const;
+    int getIdx(const QString& name) const;
 
     bool insertRows(int row, int count, QString& name, const QModelIndex &parent);
     bool appendRow(const QString &name, const QModelIndex &parent);
     bool removeRows(int row, int count, const QModelIndex &parent) override;
 
 private:
-    QList<QPointer<Activity>> activities;
+    std::vector<std::shared_ptr<Activity>> activities;
 };

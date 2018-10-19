@@ -1,29 +1,21 @@
 #pragma once
 
-#include <QObject>
 #include <QDateTime>
 #include <QElapsedTimer>
 
-class Activity : public QObject
+class Activity
 {
-    Q_OBJECT
 public:
-    explicit Activity(QObject *parent = nullptr,  const QString &name = QString());
-    Activity(const Activity &other);
-    Activity& operator=(const Activity &other);
+    explicit Activity(const QString &name);
     ~Activity();
 
-    QString getName() const;
-    QDateTime getBeginDate() const;
-    qint64 getElapsedTime() const;
+    const QString name;
+    const QDateTime beginDate;
+    qint64 elapsedTime() const;
 
 private:
     bool timeIsValid() const;
 
-    QString m_name;
-    QDateTime beginDate;
     QElapsedTimer timer;
 
 };
-
-    Q_DECLARE_METATYPE(Activity)

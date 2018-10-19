@@ -4,46 +4,40 @@
 #include <QSqlError>
 #include <QDateTime>
 
+#define DictActivity "DictActivity"
+#define HistorySchedule "HistorySchedule"
+#define DailySchedule "DailySchedule"
 
+DataBase::DataBase(QObject *parent)
+  : QObject(parent)
+{}
 
-DataBase::DataBase(QObject *parent) : QObject(parent) {}
-
-DataBase::~DataBase() {}
-
-//-----------------------opening db
-void DataBase::connect(const QString &dbPath)
-{
-    if(!QFile(dbPath).exists())//":/db/db/LMtest.db"
-        qDebug() << "DataBase::connect::\t\tDB path not found";
-    else
-        this->open(dbPath);
-}
+DataBase::~DataBase()
+{}
 
 bool DataBase::open(const QString &dbPath)
 {
+    if(!QFile(dbPath).exists())//":/db/db/LMtest.db"
+    {
+        qDebug() << "DataBase::connect::\t\tDB path not found";
+        return false;
+    }
+
     db = QSqlDatabase::addDatabase("QSQLITE");
 //    db.setHostName("LMtest");
     db.setDatabaseName(dbPath);
 
     if (db.open())
     {
-        emit opened();
+        initActivityMap();
+        initFrequency();
+        archiveJob();
         return  true;
     }
-    else
-    {
-        qDebug() << "DataBase::open::\t\tcould not open db";
-        qDebug() << db.lastError().text();
-        return false;
-    }
-}
 
-void DataBase::initDB()
-{//list of functions that will launch with app
-    initActivityMap();
-    initFrequency();
-
-    archiveJob();
+    qDebug() << "DataBase::open::\t\tcould not open db";
+    qDebug() << db.lastError().text();
+    return false;
 }
 
 void DataBase::archiveJob()
@@ -104,12 +98,13 @@ void DataBase::initFrequency()
     qDebug() << "DataBase::initFrequency::\t";
 }
 
-const QMap<QString, int>* DataBase::getFrequency()
+
+void DataBase::getFrequency(QMap<QString, int> &result)
 {
     qDebug() << "DataBase::getFrequency::\t";
     QSqlQuery query("select Activity, Frequency, ActivityID from " DictActivity"");
 
-    QMap<QString, int>* result = new QMap<QString, int>;
+    result.clear();
 
     while (query.next())
     {
@@ -122,16 +117,15 @@ const QMap<QString, int>* DataBase::getFrequency()
 
         QString name = query.value(0).toString();
 
-        result->insert(name, frequency);
+        result.insert(name, frequency);
     }
 
-    result->insert("None", 0);//special case - i do not want "None" activity to be in top... ever
+    result.insert("None", 0);//special case - i do not want "None" activity to be in top... ever
 
     qDebug() << "DataBase::getFrequency::\t";
-    return  result;
 }
 
-const QMap<QString, int> DataBase::getActivityMap()
+const QMap<QString, int>& DataBase::getActivityMap()
 {
     return activityMap;
 }
@@ -332,6 +326,32 @@ int DataBase::findId(QString &name)
     return 0;
 }
 
+bool DataBase::insertActivity(int id, const QDateTime &begin, const QDateTime &end, QString table)
+{
+    if (diffDays(begin, end))
+        separateDate(id, begin, end);
+
+    QSqlQuery query;
+
+    query.prepare("insert into " + table + " (BeginDate, EndDate, ActivityID)"
+                  "VALUES (:BeginDate, :EndDate, :ActivityID)");
+
+    query.bindValue(":ActivityID", id);
+    query.bindValue(":BeginDate", begin.toString("yyyy-MM-dd HH:mm:ss.zzz"));
+    query.bindValue(":EndDate", end.toString("yyyy-MM-dd HH:mm:ss.zzz"));
+
+    if (!query.exec())
+    {
+        qDebug() << "DataBase::insertActivity::\t\tcould not insert";
+        qDebug() << query.lastError().text();
+        return false;
+    }
+    else
+        return true;
+
+    return false;
+}
+
 bool DataBase::diffDays(const QDateTime &begin,const QDateTime &end)
 {
     return begin.daysTo(end) > 0 ? true : false;
@@ -413,31 +433,9 @@ bool DataBase::insertActivity(int id, const QDateTime &begin, const QDateTime &e
     return false;
 }
 
-bool DataBase::insertActivity(int id, const QDateTime &begin, const QDateTime &end, QString table)
+bool DataBase::insertActivityDaily(int id, const QDateTime &begin, const QDateTime &end)
 {
-//    qDebug() << "DataBase::insertActivity::\t\t";
-    if (diffDays(begin, end))
-        separateDate(id, begin, end);
-
-    QSqlQuery query;
-
-    query.prepare("insert into " + table + " (BeginDate, EndDate, ActivityID)"
-                  "VALUES (:BeginDate, :EndDate, :ActivityID)");
-
-    query.bindValue(":ActivityID", id);
-    query.bindValue(":BeginDate", begin.toString("yyyy-MM-dd HH:mm:ss.zzz"));
-    query.bindValue(":EndDate", end.toString("yyyy-MM-dd HH:mm:ss.zzz"));
-
-    if (!query.exec())
-    {
-        qDebug() << "DataBase::insertActivity::\t\tcould not insert";
-        qDebug() << query.lastError().text();
-        return false;
-    }
-    else
-        return true;
-
-    return false;
+    return insertActivity(id, begin, end, DailySchedule);
 }
 
 bool DataBase::insertActivity(QSqlQuery *insert, const QSqlQuery *currQuery)

@@ -14,7 +14,7 @@ class MenuWindow
     Q_OBJECT
 
 public:
-    explicit MenuWindow(DataBase *m_db, QWidget *parent = nullptr);
+    explicit MenuWindow(std::shared_ptr<DataBase> m_db, QWidget *parent = nullptr);
     ~MenuWindow();
 
 private slots:
@@ -22,6 +22,6 @@ private slots:
 
 private:
     Ui::MenuWindow *m_ui;
-    DataBase *m_db;
+    std::shared_ptr<DataBase> m_db;
 };
 

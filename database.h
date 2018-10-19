@@ -1,34 +1,35 @@
-#ifndef DATABASE_H
-#define DATABASE_H
+#pragma once
 
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 
-#define DictActivity "DictActivity"
-#define HistorySchedule "HistorySchedule"
-#define DailySchedule "DailySchedule"
-
-class DataBase : public QObject
+class DataBase
+  : public QObject
 {
     Q_OBJECT
+
 public:
     explicit DataBase(QObject *parent = nullptr);
     ~DataBase();
 
+    bool open(const QString &dbPath);
+
     bool insertActivity(const QVariantList &data);
     bool insertActivity(QSqlQuery *insert, const QSqlQuery *currQuery);
     bool insertActivity(int id, const QDateTime &begin, const QDateTime &end);
-    bool insertActivity(int id, const QDateTime &begin, const QDateTime &end, QString table);
-    void connect(const QString &dbPath);
-    const QMap<QString, int> *getFrequency();
-    const QMap<QString, int> getActivityMap();
+    bool insertActivityDaily(int id, const QDateTime &begin, const QDateTime &end);
+
+    void getFrequency(QMap<QString, int>& frequency);
+    const QMap<QString, int>& getActivityMap();
     void archiveJob();
     QString findName(int id);
     int findId(QString &name);
 
 private:
+
+    bool insertActivity(int id, const QDateTime &begin, const QDateTime &end, QString table);
 
     QMap<QString, int> activityMap;
     QSqlDatabase db;
@@ -43,18 +44,8 @@ private:
     void fillSpaces();
     bool clearDailySchedule();
 
-    bool open(const QString &dbPath);
     void close();
     void initActivityMap();
     int setFrequency(int id);
     void initFrequency();
-
-
-signals:
-    void opened();
-
-public slots:
-    void initDB();
 };
-
-#endif // DATABASE_H

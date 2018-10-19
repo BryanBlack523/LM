@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <QMainWindow>
 
 class QTimer;
@@ -55,7 +57,7 @@ private:
     QString getDbPath();
 
     void fillTable(int rows, int items);
-    void fillFrequencyTable(const QMap<QString, int>*);
+    void fillFrequencyTable(const QMap<QString, int>&);
 
     Ui::MainWindow *m_ui;
     MenuWindow *m_menu;
@@ -69,5 +71,5 @@ private:
     QTimer *m_timerOneDay;
 
     int m_tableCollumnsCount = 4;
-    DataBase *m_db;
+    std::shared_ptr<DataBase> m_db;
 };

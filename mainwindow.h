@@ -1,27 +1,28 @@
 #pragma once
 
-#include "menuwindow.h"
-#include "activitylistmodel.h"
-#include "activity.h"
-#include "database.h"
 #include <QMainWindow>
-#include <QStandardItemModel>
-#include <QList>
-#include <QTimer>
-#include <QKeyEvent>
-#include <QSqlQueryModel>
+
+class QTimer;
+class QStandardItemModel;
 
 namespace Ui {
-class MainWindow;
+  class MainWindow;
 }
 
-class MainWindow : public QMainWindow
+class MenuWindow;
+class ActivityListModel;
+class DataBase;
+
+class MainWindow
+  : public QMainWindow
 {
     Q_OBJECT
 
 public:
+
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
     void resizeEvent(QResizeEvent *event);
 
 private slots:
@@ -48,16 +49,6 @@ private slots:
     void on_HistoryButton_2_clicked();
 
 private:
-    Ui::MainWindow *ui;
-    MenuWindow *menu;
-
-    QStandardItemModel *tableModel;
-    QStandardItemModel *frequencyModel;
-    ActivityListModel *listModel;
-
-    QTimer *timer_1s;
-    QTimer *timer_1h;
-    QTimer *timer_1d;
 
     void deleteActivity(const QString&);
     void addActivity(const QString&);
@@ -66,6 +57,17 @@ private:
     void fillTable(int rows, int items);
     void fillFrequencyTable(const QMap<QString, int>*);
 
+    Ui::MainWindow *m_ui;
+    MenuWindow *m_menu;
+
+    QStandardItemModel *m_tableModel;
+    QStandardItemModel *m_frequencyModel;
+    ActivityListModel *m_listModel;
+
+    QTimer *m_timerOneS;
+    QTimer *m_timerOneHour;
+    QTimer *m_timerOneDay;
+
     int m_tableCollumnsCount = 4;
-    DataBase db;
+    DataBase *m_db;
 };

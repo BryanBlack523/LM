@@ -1,27 +1,27 @@
-#ifndef MENUWINDOW_H
-#define MENUWINDOW_H
+#pragma once
 
-#include <database.h>
 #include <QDialog>
 
 namespace Ui {
 class MenuWindow;
 }
 
-class MenuWindow : public QDialog
+class DataBase;
+
+class MenuWindow
+  : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit MenuWindow(QWidget *parent = nullptr, const QString &dbPath = QString());
+    explicit MenuWindow(DataBase *m_db, QWidget *parent = nullptr);
     ~MenuWindow();
 
 private slots:
     void on_importButton_clicked();
 
 private:
-    Ui::MenuWindow *ui;
-    DataBase db;
+    Ui::MenuWindow *m_ui;
+    DataBase *m_db;
 };
 
-#endif // MENUWINDOW_H

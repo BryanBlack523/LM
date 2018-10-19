@@ -1,31 +1,34 @@
-#include "mainwindow.h"
 #include <QApplication>
-#include <QStandardPaths>
-#include <QDir>
 #include <QDebug>
+#include <QDir>
+#include <QStandardPaths>
+
+#include "mainwindow.h"
+
+void createWorkDir()
+{
+    auto pathDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    if (pathDataLocation.isEmpty())
+        qFatal("Cannot determine data storage location");
+
+    QDir workDirectory{pathDataLocation};
+    if (workDirectory.mkpath(workDirectory.absolutePath()))
+    {
+        qDebug() << pathDataLocation << " created";
+    }
+}
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication application(argc, argv);
 
-    a.setOrganizationDomain("IB");
-    a.setApplicationName("LM");
+    application.setOrganizationDomain("IB");
+    application.setApplicationName("LM");
 
-    auto path = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-    if (path.isEmpty())
-        qFatal("Cannot determine data storage location");
-
-    QDir d{path};
-    if (d.mkpath(d.absolutePath()))
-    {
-      qDebug() << path << " created";
-//      QFile f{"settings.txt"};
-//      if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
-//        f.write("Hello, World");
-    }
+    createWorkDir();
 
     MainWindow w;
     w.show();
 
-    return a.exec();
+    return application.exec();
 }

@@ -1,24 +1,25 @@
 #include "menuwindow.h"
-#include "ui_menuwindow.h"
-#include "importtool.h"
+
+#include <QDateTime>
+#include <QDebug>
 #include <QFileDialog>
 #include <QStandardPaths>
-#include <QDebug>
-#include <QDateTime>
 
-MenuWindow::MenuWindow(QWidget *parent, const QString &dbPath) :
-    QDialog(parent),
-    ui(new Ui::MenuWindow)
+#include "database.h"
+#include "importtool.h"
+#include "ui_menuwindow.h"
+
+MenuWindow::MenuWindow(DataBase *db, QWidget *parent)
+  : QDialog(parent)
+  , m_ui(new Ui::MenuWindow)
+  , m_db(db)
 {
-    ui->setupUi(this);
-
-    db.connect(dbPath);
-    db.initDB();
+    m_ui->setupUi(this);
 }
 
 MenuWindow::~MenuWindow()
 {
-    delete ui;
+    delete m_ui;
 }
 
 void MenuWindow::on_importButton_clicked()
@@ -28,7 +29,6 @@ void MenuWindow::on_importButton_clicked()
                                                   "",
                                                   tr("Files (*.txt, *csv)")));
     QFileInfo inf(importFile);
-//    qDebug() << inf.filePath();
 
     ImportTool tool(this, inf.filePath());
     tool.read();
@@ -38,9 +38,8 @@ void MenuWindow::on_importButton_clicked()
     for (int i = 0; i < tool.getSize(); ++i)
     {
         QList<QString> entry = tool.getEntry(i);
-        int id = db.findId(entry[2]);
-//        qDebug() << i << " raw: " << entry[2] << " " << ">>" << id << entry[0] << " " << entry[1];
-        db.insertActivity(id, QDateTime::fromString(entry[0], "yyyy-MM-dd HH:mm:ss.zzz"), QDateTime::fromString(entry[1], "yyyy-MM-dd HH:mm:ss.zzz"), DailySchedule);
+        int id = m_db->findId(entry[2]);
+        m_db->insertActivity(id, QDateTime::fromString(entry[0], "yyyy-MM-dd HH:mm:ss.zzz"), QDateTime::fromString(entry[1], "yyyy-MM-dd HH:mm:ss.zzz"), DailySchedule);
     }
 
 }

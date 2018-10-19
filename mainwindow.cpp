@@ -115,7 +115,7 @@ void MainWindow::deleteActivity(const QString &cellText)
         qDebug() << "MainWindow::deleteActivity\t\tFailed to get Idx of " << cellText;
     else
     {
-        row = row.toInt() - 1;// why? check ActivityListModel::getIdx()
+        row = row.toInt() - 1; // why? check ActivityListModel::getIdx()
         m_listModel->removeRows(row.toInt(), 1, QModelIndex());
     }
 }
@@ -124,8 +124,6 @@ void MainWindow::keyPressEvent(QKeyEvent* key)
 {
     if ( (key->key()== Qt::Key_F1))
     {
-//        m_menu = new MenuWindow(this, m_db);
-        m_menu = new MenuWindow(m_db);
         m_menu = new MenuWindow(m_db, this);
         m_menu->show();
     }

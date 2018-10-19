@@ -1,12 +1,17 @@
 #include "activity.h"
 #include <QDebug>
 
-Activity::Activity(QObject *parent, const QString &name) : QObject(parent), m_name(name), beginDate(QDateTime::currentDateTime())
+Activity::Activity(QObject *parent, const QString &name)
+  : QObject(parent)
+  , m_name(name)
+  , beginDate(QDateTime::currentDateTime())
 {
     timer.start();
 }
 
-Activity::Activity(const Activity &other) : QObject (other.parent()) {}
+Activity::Activity(const Activity &other)
+  : QObject (other.parent())
+{}
 
 Activity &Activity::operator =(const Activity &other)
 {

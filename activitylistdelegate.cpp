@@ -1,8 +1,13 @@
 #include "activitylistdelegate.h"
+
 #include <QDebug>
 #include <QPainter>
 
-ActivityListDelegate::ActivityListDelegate(QObject *parent) :QItemDelegate (parent) {}
+#include "activitylistmodel.h"
+
+ActivityListDelegate::ActivityListDelegate(QObject *parent)
+  : QItemDelegate (parent)
+{}
 
 void ActivityListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
@@ -22,9 +27,13 @@ void ActivityListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 
     int time = index.data(ActivityListModel::ElapsedTime).toInt();
 
-    QString out = QString("%1:%2:%3").arg(time /  360000          , 2, 10, QChar('0'))
-                                     .arg((time % 360000)/ 60000, 2, 10, QChar('0'))
-                                     .arg((time % 60000) /  1000  , 2, 10, QChar('0'));
-
-    painter->drawText(labelRect, Qt::AlignRight, out, &boundingRect);
+    painter->drawText(labelRect, Qt::AlignRight, timeToString(time), &boundingRect);
 }
+
+QString ActivityListDelegate::timeToString(qint64 time)
+{
+    return QString("%1:%2:%3").arg(time /  360000          , 2, 10, QChar('0'))
+            .arg((time % 360000)/ 60000, 2, 10, QChar('0'))
+            .arg((time % 60000) /  1000  , 2, 10, QChar('0'));
+}
+

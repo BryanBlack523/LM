@@ -1,15 +1,18 @@
-#ifndef ACTIVITYLISTDELEGATE_H
-#define ACTIVITYLISTDELEGATE_H
-#include <QItemDelegate>
-#include <activitylistmodel.h>
+#pragma once
 
-class ActivityListDelegate : public QItemDelegate
+#include <QItemDelegate>
+
+class ActivityListDelegate
+  : public QItemDelegate
 {
     Q_OBJECT
+
 public:
     explicit ActivityListDelegate(QObject *parent = nullptr);
-protected:
-    virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-};
 
-#endif // LABELDDELEGATE_H
+protected:
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+    static QString timeToString(qint64 time);
+};

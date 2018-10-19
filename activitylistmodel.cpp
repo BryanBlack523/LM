@@ -1,8 +1,11 @@
 #include "activitylistmodel.h"
+
 #include <QDebug>
 #include <QSize>
 
-ActivityListModel::ActivityListModel(QObject *parent) : QAbstractListModel(parent) {}
+ActivityListModel::ActivityListModel(QObject *parent)
+  : QAbstractListModel(parent)
+{}
 
 ActivityListModel::~ActivityListModel()
 {
@@ -109,11 +112,3 @@ QVariant ActivityListModel::getIdx(const QString& name) const
     return false;
 }
 
-QHash<int, QByteArray> ActivityListModel::roleNames() const
-{
-    QHash <int,QByteArray> roles;
-    roles [Name]="name";
-    roles [BeginDate]="beginDate";
-    roles [ElapsedTime]="ElapsedTime";
-    return roles;
-}

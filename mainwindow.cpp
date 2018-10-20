@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_timerOneS->start(1000);//1s
 
     connect(m_timerOneHour, SIGNAL(timeout()), this, SLOT(initTable()));//refill table after 1h (to keep up with changes)
-    m_timerOneHour->start(360000);//1h
+    m_timerOneHour->start(36000000);//1h
 
     connect(m_timerOneDay, SIGNAL(timeout()), this, SLOT(archive()));
     m_timerOneDay->start(QTime::currentTime().msecsTo(QTime(23, 59, 59, 999)));
@@ -94,6 +94,8 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 {
     m_ui->activitiesTableView->horizontalHeader()->resizeSections(QHeaderView::Stretch);
     m_ui->activitiesTableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    m_ui->activitiesTableView->verticalHeader()->setDefaultSectionSize(m_ui->activitiesTableView->height()/6);
 
     QMainWindow::resizeEvent(event);
 }
@@ -151,15 +153,18 @@ void MainWindow::fillTable(int rows, int items)
         {
             int filledCount = i * m_tableCollumnsCount + j;// number of items added
 
+            // make cells not selectable and not editable
+            m_tableModel->itemFromIndex(m_tableModel->index(i, j))->setFlags(Qt::NoItemFlags);
 //            qDebug() << i << "/" << j << " filledCount " << filledCount << " item " << frequencyModel->data(frequencyModel->index(filledCount, 0)).toString();
             if (filledCount < items)
             {
                 QString name = m_frequencyModel->data(m_frequencyModel->index(filledCount, 0)).toString();
 
                 m_tableModel->setData(m_tableModel->index(i, j), name);
+
+                // only this items will be pressable
+                m_tableModel->itemFromIndex(m_tableModel->index(i, j))->setFlags(Qt::ItemIsEnabled);
             }
-            else
-                m_tableModel->itemFromIndex(m_tableModel->index(i, j))->setFlags(Qt::NoItemFlags);//set rest of the cells not active for user
         }
 }
 
@@ -223,6 +228,8 @@ void MainWindow::updateTime()
 
 void MainWindow::initTable()
 {
+    qDebug() << "MainWindow::initTable\t";
+
     QMap<QString, int> frequency;
     m_db->getFrequency(frequency);
     fillFrequencyTable(frequency);

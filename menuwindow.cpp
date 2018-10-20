@@ -31,6 +31,11 @@ void MenuWindow::on_importButton_clicked()
     QFileInfo inf(importFile);
 
     ImportTool tool(this, inf.filePath());
+
+//    progressDialog = new ImportProgressDialog(this);
+//    progressDialog->show();
+
+
     tool.read();
     tool.parse();
     tool.convertDate();
@@ -43,5 +48,6 @@ void MenuWindow::on_importButton_clicked()
                                   QDateTime::fromString(entry[0], "yyyy-MM-dd HH:mm:ss.zzz"),
                                   QDateTime::fromString(entry[1], "yyyy-MM-dd HH:mm:ss.zzz"));
     }
+    qDebug() << "Import complete";
 
 }

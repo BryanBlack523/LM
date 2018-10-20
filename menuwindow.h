@@ -1,6 +1,12 @@
 #pragma once
 
+#include <database.h>
+
+#include <memory>
 #include <QDialog>
+
+#include <importprogressdialog.h>
+
 
 namespace Ui {
 class MenuWindow;
@@ -21,7 +27,9 @@ private slots:
     void on_importButton_clicked();
 
 private:
+
     Ui::MenuWindow *m_ui;
+    ImportProgressDialog *progressDialog;
     std::shared_ptr<DataBase> m_db;
 };
 

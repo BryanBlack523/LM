@@ -95,7 +95,7 @@ std::shared_ptr<Activity> ActivityListModel::find(const QString& name) const
     return it == activities.end() ? nullptr : *it;
 }
 
-int ActivityListModel::getIdx(const QString& name) const
+int ActivityListModel::indexOf(const QString& name) const
 {
     auto it = std::find_if(activities.begin(),
                            activities.end(),

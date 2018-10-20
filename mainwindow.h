@@ -29,32 +29,28 @@ public:
 
 private slots:
 
-    void on_tableActivityClicked(const QModelIndex &);
-    void on_listActivityClicked(const QModelIndex &);
+    void tableActivityClicked(const QModelIndex &);
+    void listActivityClicked(const QModelIndex &);
 
-    void updateTime();
-    void initTable();
     void archive();
+    void initTable();
     void keyPressEvent(QKeyEvent *key);
     void saveActivity(const QModelIndex &index, int, int);
+    void updateTime();
 
-    void on_TimeButton_clicked();
-
-    void on_PlansButton_clicked();
-
-    void on_FinancesButton_clicked();
-
-    void on_PresentButton_2_clicked();
-
-    void on_GraphsButton_2_clicked();
-
-    void on_HistoryButton_2_clicked();
+    void financesButtonClicked();
+    void graphsButtonClicked();
+    void historyButtonClicked();
+    void plansButtonClicked();
+    void presentButtonClicked();
+    void timeButtonClicked();
 
 private:
 
     void deleteActivity(const QString&);
     void addActivity(const QString&);
-    QString getDbPath();
+
+    QString dbPath();
 
     void fillTable(int rows, int items);
     void fillFrequencyTable(const QMap<QString, int>&);

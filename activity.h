@@ -6,6 +6,7 @@
 class Activity
 {
 public:
+
     explicit Activity(const QString &name);
     ~Activity();
 
@@ -14,6 +15,7 @@ public:
     qint64 elapsedTime() const;
 
 private:
+
     bool timeIsValid() const;
 
     QElapsedTimer timer;

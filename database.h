@@ -1,9 +1,11 @@
 #pragma once
 
+#include <QMap>
 #include <QObject>
 #include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QSqlQueryModel>
+
+class QSqlDatabase;
+class QSqlQuery;
 
 class DataBase
   : public QObject
@@ -11,41 +13,38 @@ class DataBase
     Q_OBJECT
 
 public:
+
     explicit DataBase(QObject *parent = nullptr);
     ~DataBase();
 
     bool open(const QString &dbPath);
-
-    bool insertActivity(const QVariantList &data);
-    bool insertActivity(QSqlQuery *insert, const QSqlQuery *currQuery);
-    bool insertActivity(int id, const QDateTime &begin, const QDateTime &end);
     bool insertActivityDaily(int id, const QDateTime &begin, const QDateTime &end);
 
-    void getFrequency(QMap<QString, int>& frequency);
-    const QMap<QString, int>& getActivityMap();
-    void archiveJob();
     QString findName(int id);
+    const QMap<QString, int>& getActivityMap();
     int findId(QString &name);
+    void archiveJob();
+    void getFrequency(QMap<QString, int>& frequency);
 
 private:
 
-    bool insertActivity(int id, const QDateTime &begin, const QDateTime &end, QString table);
+    bool insertActivityHistory(const QSqlQuery *currQuery);
+    bool insertActivityHistory(int id, const QDateTime &begin, const QDateTime &end);
+    bool insertActivityTable(int id, const QDateTime &begin, const QDateTime &end, QString table);
+
+    std::vector<std::vector<QDateTime> > getFilledTime();
+    bool clearDailySchedule();
+    bool diffDays(const QDateTime &begin, const QDateTime &end);
+    bool isArchived();
+    void archiveActivities();
+    void fillSpaces();
+    void separateDate(const int id, const QDateTime &begin, const QDateTime &end);
+
+    int setFrequency(int id);
+    void close();
+    void initActivityMap();
+    void initFrequency();
 
     QMap<QString, int> activityMap;
     QSqlDatabase db;
-//    QString dbPath = "G:/Projects/LM/db/LMtest.db";
-//    QString dbPath = "D:/Projects/LM/db/LMtest.db";
-
-    void archiveActivities();
-    bool isArchived();
-    bool diffDays(const QDateTime &begin, const QDateTime &end);
-    void separateDate(const int id, const QDateTime &begin, const QDateTime &end);
-    QList<QList<QDateTime> > getFilledTime();
-    void fillSpaces();
-    bool clearDailySchedule();
-
-    void close();
-    void initActivityMap();
-    int setFrequency(int id);
-    void initFrequency();
 };

@@ -1,30 +1,28 @@
-#ifndef IMPORTTOOL_H
-#define IMPORTTOOL_H
+#pragma once
 
 #include <QObject>
-#include <QFile>
-#include <QFileInfo>
+
+class QFileInfo;
 
 class ImportTool : public QObject
 {
     Q_OBJECT
+
 public:
-    explicit ImportTool(QObject *parent = nullptr, const QString &filePath = QString());
+
+    explicit ImportTool(const QString &filePath, QObject *parent = nullptr);
     ~ImportTool();
 
-    void read();
-    void parse();
-    void convertDate();
     QList<QString> getEntry(int row);
-    int getSize();
+    int size();
+    void convertDate();
+    void parse();
+    void read();
 
 private:
-    QFileInfo fileInfo;
+
+    QFileInfo *fileInfo;
     QList<QString> lines;
     QList<QList<QString>> parsedList;
-signals:
 
-public slots:
 };
-
-#endif // IMPORTTOOL_H

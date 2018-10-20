@@ -2,9 +2,7 @@
 
 #include <QDebug>
 #include <QDir>
-#include <QErrorMessage>
 #include <QKeyEvent>
-#include <QSqlQueryModel>
 #include <QStandardItem>
 #include <QStandardItemModel>
 #include <QStandardPaths>
@@ -30,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
-    m_db->open(getDbPath());
+    m_db->open(dbPath());
 
     initTable();
 
@@ -41,8 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_ui->currentActivitiesListView->setModel(m_listModel);
 
     connect(m_listModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)), this, SLOT(saveActivity(const QModelIndex &, int, int)));
-    connect(m_ui->activitiesTableView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_tableActivityClicked(const QModelIndex&)));
-    connect(m_ui->currentActivitiesListView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(on_listActivityClicked(const QModelIndex&)));
+    connect(m_ui->activitiesTableView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(tableActivityClicked(const QModelIndex&)));
+    connect(m_ui->currentActivitiesListView, SIGNAL(pressed(const QModelIndex&)), this, SLOT(listActivityClicked(const QModelIndex&)));
 
     m_timerOneS = new QTimer(this);
     m_timerOneHour = new QTimer(this);
@@ -64,7 +62,7 @@ MainWindow::~MainWindow()
     delete m_ui;
 }
 
-QString MainWindow::getDbPath()
+QString MainWindow::dbPath()
 {
     QDir resultPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/data/";
 
@@ -109,10 +107,10 @@ void MainWindow::addActivity(const QString &cellText)
 
 void MainWindow::deleteActivity(const QString &cellText)
 {
-    int row = m_listModel->getIdx(cellText);
+    int row = m_listModel->indexOf(cellText);
 
     if (row == -1)
-        qDebug() << "MainWindow::deleteActivity\t\tFailed to get Idx of " << cellText;
+        qDebug() << "MainWindow::deleteActivity\t\tFailed to get indexOf " << cellText;
     else
         m_listModel->removeRows(row, 1, QModelIndex());
 }
@@ -185,7 +183,7 @@ void MainWindow::fillFrequencyTable(const QMap<QString, int>& frequencyMap)
 
 //--------------------------------SLOTS implementation
 
-void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
+void MainWindow::tableActivityClicked(const QModelIndex &tableIndex)
 {
     QString cellText = m_ui->activitiesTableView->model()->data(tableIndex).toString();
 
@@ -204,7 +202,7 @@ void MainWindow::on_tableActivityClicked(const QModelIndex &tableIndex)
     }
 }
 
-void MainWindow::on_listActivityClicked(const QModelIndex &listIndex)
+void MainWindow::listActivityClicked(const QModelIndex &listIndex)
 {
     if (!listIndex.isValid())
         qDebug() << "MainWindow::on_listActivityClicked\t\tindex is not valid";
@@ -262,32 +260,32 @@ void MainWindow::archive()
 
 //---------------------------Push Buttons SLOTS
 
-void MainWindow::on_TimeButton_clicked()
+void MainWindow::timeButtonClicked()
 {
     m_ui->mwStackedWidget->setCurrentIndex(0);//open timePage
 }
 
-void MainWindow::on_PlansButton_clicked()
+void MainWindow::plansButtonClicked()
 {
     m_ui->mwStackedWidget->setCurrentIndex(1);//open plansPage
 }
 
-void MainWindow::on_FinancesButton_clicked()
+void MainWindow::financesButtonClicked()
 {
     m_ui->mwStackedWidget->setCurrentIndex(2);//open financesPage
 }
 
-void MainWindow::on_PresentButton_2_clicked()
+void MainWindow::presentButtonClicked()
 {
     m_ui->timeStackedWidget->setCurrentIndex(0);//open timePage.presentPage
 }
 
-void MainWindow::on_HistoryButton_2_clicked()
+void MainWindow::historyButtonClicked()
 {
     m_ui->timeStackedWidget->setCurrentIndex(1);//open timePage.historyPage
 }
 
-void MainWindow::on_GraphsButton_2_clicked()
+void MainWindow::graphsButtonClicked()
 {
     m_ui->timeStackedWidget->setCurrentIndex(2);//open timePage.graphsPage
 }

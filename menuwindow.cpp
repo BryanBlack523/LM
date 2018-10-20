@@ -22,7 +22,7 @@ MenuWindow::~MenuWindow()
     delete m_ui;
 }
 
-void MenuWindow::on_importButton_clicked()
+void MenuWindow::importButtonClicked()
 {
     QFile importFile(QFileDialog::getOpenFileName(this,
                                                   tr("Open file"),
@@ -30,7 +30,7 @@ void MenuWindow::on_importButton_clicked()
                                                   tr("Files (*.txt, *csv)")));
     QFileInfo inf(importFile);
 
-    ImportTool tool(this, inf.filePath());
+    ImportTool tool(inf.filePath(), this);
 
 //    progressDialog = new ImportProgressDialog(this);
 //    progressDialog->show();
@@ -40,7 +40,7 @@ void MenuWindow::on_importButton_clicked()
     tool.parse();
     tool.convertDate();
 
-    for (int i = 0; i < tool.getSize(); ++i)
+    for (int i = 0; i < tool.size(); ++i)
     {
         QList<QString> entry = tool.getEntry(i);
         int id = m_db->findId(entry[2]);

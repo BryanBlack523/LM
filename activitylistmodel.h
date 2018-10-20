@@ -43,7 +43,7 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     std::shared_ptr<Activity> find(const QString& name) const;
-    int getIdx(const QString& name) const;
+    int indexOf(const QString& name) const;
 
     bool insertRows(int row, int count, QString& name, const QModelIndex &parent);
     bool appendRow(const QString &name, const QModelIndex &parent);

@@ -1,25 +1,24 @@
 #include "importtool.h"
-#include <QFile>
-#include <QTextStream>
-#include <QDebug>
-#include <QFileInfo>
-#include <QDateTime>
 
-ImportTool::ImportTool(QObject *parent, const QString &filePath) : QObject(parent)
+#include <QDateTime>
+#include <QDebug>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+
+ImportTool::ImportTool(const QString &filePath, QObject *parent)
+  : QObject(parent)
 {
     qDebug() << "ImportTool::ImportTool";
-    fileInfo.setFile(filePath);
-    qDebug() << fileInfo.filePath();
+    fileInfo->setFile(filePath);
+    qDebug() << fileInfo->filePath();
 }
 
-ImportTool::~ImportTool()
-{
-
-}
+ImportTool::~ImportTool() {}
 
 void ImportTool::read()
 {
-    QFile importFile(fileInfo.filePath());
+    QFile importFile(fileInfo->filePath());
 
     if (importFile.open(QIODevice::ReadOnly))
     {
@@ -87,7 +86,7 @@ QList<QString> ImportTool::getEntry(int row)
     return parsedList[row];
 }
 
-int ImportTool::getSize()
+int ImportTool::size()
 {
     return parsedList.size();
 }

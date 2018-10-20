@@ -22,8 +22,8 @@ void ActivityListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 
     int time = index.data(ActivityListModel::ElapsedTime).toInt();
 
-    QString out = QString("%1:%2:%3").arg(time /  360000          , 2, 10, QChar('0'))
-                                     .arg((time % 360000)/ 60000, 2, 10, QChar('0'))
+    QString out = QString("%1:%2:%3").arg(time /  36000000        , 2, 10, QChar('0'))
+                                     .arg((time % 36000000)/ 60000, 2, 10, QChar('0'))
                                      .arg((time % 60000) /  1000  , 2, 10, QChar('0'));
 
     painter->drawText(labelRect, Qt::AlignRight, out, &boundingRect);

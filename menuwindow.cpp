@@ -31,6 +31,11 @@ void MenuWindow::on_importButton_clicked()
 //    qDebug() << inf.filePath();
 
     ImportTool tool(this, inf.filePath());
+
+//    progressDialog = new ImportProgressDialog(this);
+//    progressDialog->show();
+
+
     tool.read();
     tool.parse();
     tool.convertDate();
@@ -42,5 +47,6 @@ void MenuWindow::on_importButton_clicked()
 //        qDebug() << i << " raw: " << entry[2] << " " << ">>" << id << entry[0] << " " << entry[1];
         db.insertActivity(id, QDateTime::fromString(entry[0], "yyyy-MM-dd HH:mm:ss.zzz"), QDateTime::fromString(entry[1], "yyyy-MM-dd HH:mm:ss.zzz"), DailySchedule);
     }
+    qDebug() << "Import complete";
 
 }

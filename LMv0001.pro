@@ -31,7 +31,8 @@ SOURCES += \
     activity.cpp \
     menuwindow.cpp \
     database.cpp \
-    importtool.cpp
+    importtool.cpp \
+    importprogressdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -40,11 +41,13 @@ HEADERS += \
     activity.h \
     menuwindow.h \
     database.h \
-    importtool.h
+    importtool.h \
+    importprogressdialog.h
 
 FORMS += \
         mainwindow.ui \
-    menuwindow.ui
+    menuwindow.ui \
+    importprogressdialog.ui
 
 RESOURCES += \
     resourses.qrc

@@ -362,7 +362,10 @@ void DataBase::separateDate(const int id,const QDateTime &begin,const QDateTime 
 bool DataBase::insertActivity(const QVariantList &data)
 {
     if (diffDays(data[1].toDateTime(), data[2].toDateTime()))
+    {
         separateDate(activityMap[data[0].toString()], data[1].toDateTime(), data[2].toDateTime());
+        return true;
+    }
 
     QSqlQuery query;
 
@@ -390,7 +393,10 @@ bool DataBase::insertActivity(const QVariantList &data)
 bool DataBase::insertActivity(int id, const QDateTime &begin, const QDateTime &end)
 {
     if (diffDays(begin, end))
+    {
         separateDate(id, begin, end);
+        return true;
+    }
 
     QSqlQuery query;
 
@@ -417,7 +423,10 @@ bool DataBase::insertActivity(int id, const QDateTime &begin, const QDateTime &e
 {
 //    qDebug() << "DataBase::insertActivity::\t\t";
     if (diffDays(begin, end))
+    {
         separateDate(id, begin, end);
+        return true;
+    }
 
     QSqlQuery query;
 
@@ -443,7 +452,10 @@ bool DataBase::insertActivity(int id, const QDateTime &begin, const QDateTime &e
 bool DataBase::insertActivity(QSqlQuery *insert, const QSqlQuery *currQuery)
 {// i really don't know why i made this function... but why the fuck not?
     if (diffDays(currQuery->value(1).toDateTime(), currQuery->value(2).toDateTime()))
+    {
         separateDate(currQuery->value(0).toInt(), currQuery->value(1).toDateTime(), currQuery->value(2).toDateTime());
+        return true;
+    }
 
     insert->bindValue(":ActivityID", currQuery->value(0).toInt());
     insert->bindValue(":BeginDate", currQuery->value(1).toString());

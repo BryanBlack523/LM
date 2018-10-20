@@ -2,6 +2,7 @@
 #define MENUWINDOW_H
 
 #include <database.h>
+#include <importprogressdialog.h>
 #include <QDialog>
 
 namespace Ui {
@@ -21,6 +22,7 @@ private slots:
 
 private:
     Ui::MenuWindow *ui;
+    ImportProgressDialog *progressDialog;
     DataBase db;
 };
 

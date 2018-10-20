@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     timer_1s->start(1000);//1s
 
     connect(timer_1h, SIGNAL(timeout()), this, SLOT(initTable()));//refill table after 1h (to keep up with changes)
-    timer_1h->start(360000);//1h
+    timer_1h->start(36000000);//1h
 
     connect(timer_1d, SIGNAL(timeout()), this, SLOT(archive()));
     timer_1d->start(QTime::currentTime().msecsTo(QTime(23, 59, 59, 999)));
@@ -86,6 +86,8 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 {
     ui->activitiesTableView->horizontalHeader()->resizeSections(QHeaderView::Stretch);
     ui->activitiesTableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    ui->activitiesTableView->verticalHeader()->setDefaultSectionSize(ui->activitiesTableView->height()/6);
 
     QMainWindow::resizeEvent(event);
 }
@@ -146,15 +148,18 @@ void MainWindow::fillTable(int rows, int items)
         {
             int filledCount = i * m_tableCollumnsCount + j;// number of items added
 
+            // make cells not selectable and not editable
+            tableModel->itemFromIndex(tableModel->index(i, j))->setFlags(Qt::NoItemFlags);
 //            qDebug() << i << "/" << j << " filledCount " << filledCount << " item " << frequencyModel->data(frequencyModel->index(filledCount, 0)).toString();
             if (filledCount < items)
             {
                 QString name = frequencyModel->data(frequencyModel->index(filledCount, 0)).toString();
 
                 tableModel->setData(tableModel->index(i, j), name);
+
+                // only this items will be pressable
+                tableModel->itemFromIndex(tableModel->index(i, j))->setFlags(Qt::ItemIsEnabled);
             }
-            else
-                tableModel->itemFromIndex(tableModel->index(i, j))->setFlags(Qt::NoItemFlags);//set rest of the cells not active for user
         }
 }
 
@@ -218,6 +223,7 @@ void MainWindow::updateTime()
 
 void MainWindow::initTable()
 {
+    qDebug() << "MainWindow::initTable\t";
     fillFrequencyTable(db.getFrequency());
 
     frequencyModel->sort(1,  Qt::DescendingOrder);

@@ -1,11 +1,11 @@
 #include "mainwindow.h"
 
 #include <QDebug>
-#include <QDir>
+
 #include <QKeyEvent>
 #include <QStandardItem>
 #include <QStandardItemModel>
-#include <QStandardPaths>
+#include <QGestureEvent>
 #include <QString>
 #include <QTableView>
 #include <QTimer>
@@ -25,10 +25,11 @@ MainWindow::MainWindow(QWidget *parent)
     m_ui->setupUi(this);
 
     setWindowTitle("LM");
+    grabGesture(Qt::SwipeGesture);
 
     m_ui->mwStackedWidget->setCurrentIndex(0);////open timePage
 
-    m_db->open(dbPath());
+    m_db->open();
 
     initTable();
 
@@ -62,32 +63,6 @@ MainWindow::~MainWindow()
     delete m_ui;
 }
 
-QString MainWindow::dbPath()
-{
-    QDir resultPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/data/";
-
-    QFile dataFile(resultPath.filePath("LMtest.db"));
-    QFile resFile(":/data/db/LMtest.db");
-
-    QFileInfo dataFileInf(dataFile);
-    QFileInfo resFileInf(resFile);
-//    qDebug() << "should be:" << resultPath.filePath("LMtest.db");
-//    qDebug() << "qrs: " << resFileInf.filePath();
-
-    if (!dataFile.exists() && dataFileInf.lastModified() < resFileInf.lastModified())
-    {
-//        qDebug() << "create one!";
-//        QDir newPath = QApplication::applicationDirPath();
-        QDir newPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-        newPath.mkdir("data");
-
-        resFile.copy(resultPath.filePath("LMtest.db"));
-        QFile::setPermissions(resultPath.filePath("LMtest.db"), QFile::WriteOwner | QFile::ReadOwner);
-    }
-
-    return  resultPath.filePath("LMtest.db");
-}
-
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     m_ui->activitiesTableView->horizontalHeader()->resizeSections(QHeaderView::Stretch);
@@ -116,8 +91,25 @@ void MainWindow::deleteActivity(const QString &cellText)
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* key)
+{//open menu window on windows
+    if ((key->key()== Qt::Key_F1))
+    {
+        m_menu = new MenuWindow(m_db, this);
+        m_menu->show();
+    }
+}
+
+
+bool MainWindow::event(QEvent *event)
 {
-    if ( (key->key()== Qt::Key_F1))
+    if (event->type() == QEvent::Gesture)
+        return gestureEvent(static_cast<QGestureEvent*>(event));
+    return QWidget::event(event);
+}
+
+bool MainWindow::gestureEvent(QGestureEvent *event)
+{//open menu window on android
+    if (QGesture *swipe = event->gesture(Qt::SwipeGesture))
     {
         m_menu = new MenuWindow(m_db, this);
         m_menu->show();
@@ -264,6 +256,7 @@ void MainWindow::timeButtonClicked()
 {
     m_ui->mwStackedWidget->setCurrentIndex(0);//open timePage
 }
+
 
 void MainWindow::plansButtonClicked()
 {

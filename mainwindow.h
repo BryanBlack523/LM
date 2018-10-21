@@ -14,6 +14,7 @@ namespace Ui {
 class MenuWindow;
 class ActivityListModel;
 class DataBase;
+class QGestureEvent;
 
 class MainWindow
   : public QMainWindow
@@ -47,10 +48,11 @@ private slots:
 
 private:
 
+    bool event(QEvent *event);
+    bool gestureEvent(QGestureEvent *event);
+
     void deleteActivity(const QString&);
     void addActivity(const QString&);
-
-    QString dbPath();
 
     void fillTable(int rows, int items);
     void fillFrequencyTable(const QMap<QString, int>&);

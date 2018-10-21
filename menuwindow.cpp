@@ -27,7 +27,7 @@ void MenuWindow::importButtonClicked()
     QFile importFile(QFileDialog::getOpenFileName(this,
                                                   tr("Open file"),
                                                   "",
-                                                  tr("Files (*.txt, *csv)")));
+                                                  tr("Files (*.txt, *csv, *.db)")));
     QFileInfo inf(importFile);
 
     ImportTool tool(inf.filePath(), this);
@@ -50,4 +50,12 @@ void MenuWindow::importButtonClicked()
     }
     qDebug() << "Import complete";
 
+}
+
+void MenuWindow::exportButtonClicked()
+{
+    QDir resultPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+
+    QFile exported(resultPath.path());
+    exported.copy(resultPath.filePath("LMtest.db"));
 }

@@ -2,9 +2,11 @@
 
 #include <QDateTime>
 #include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QStandardPaths>
 
 #define DictActivity "DictActivity"
 #define HistorySchedule "HistorySchedule"
@@ -16,11 +18,123 @@ DataBase::DataBase(QObject *parent)
 
 DataBase::~DataBase(){}
 
-bool DataBase::open(const QString &dbPath)
+QString DataBase::setPath()
 {
+    QDir resultPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/data/";
+
+    QFile dataFile(resultPath.filePath("LMtest.db"));
+    QFile resFile(":/data/db/LMtest.db");
+
+    QFileInfo dataFileInf(dataFile);
+    QFileInfo resFileInf(resFile);
+
+    if (!dataFile.exists() && dataFileInf.lastModified() < resFileInf.lastModified())
+    {
+        QDir newPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+        newPath.mkdir("data");
+
+        resFile.copy(resultPath.filePath("LMtest.db"));
+        QFile::setPermissions(resultPath.filePath("LMtest.db"), QFile::WriteOwner | QFile::ReadOwner);
+    }
+
+    qDebug() << resultPath.filePath("LMtest.db");
+    return  resultPath.filePath("LMtest.db");
+}
+
+bool DataBase::createDB()
+{
+    QSqlQuery makeDaily("CREATE TABLE \" DailySchedule\" ("
+                        " `BeginDate` TEXT NOT NULL,"
+                        " `EndDate` TEXT NOT NULL,"
+                        " `ActivityID` INTEGER NOT NULL"
+                        " )");
+    QSqlQuery makeHistory("CREATE TABLE \"HistorySchedule\" ("
+                          " `ScheduleID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,"
+                          " `BeginDate` TEXT NOT NULL,"
+                          " `EndDate` TEXT NOT NULL,"
+                          " `ActivityID` INTEGER NOT NULL"
+                          " )");
+    QSqlQuery makeDictionary("CREATE TABLE \"DictActivity\" ("
+                             " `ActivityID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,"
+                             " `Activity` TEXT NOT NULL,"
+                             " `Group` TEXT NOT NULL, `GroupID` INTEGER NOT NULL,"
+                             " `Weight` INTEGER, `Frequency` INTEGER,"
+                             " `Color` TEXT DEFAULT '#000000',"
+                             " `Icon` TEXT DEFAULT 'Default'"
+                             " )");
+    QSqlQuery makeWeights("CREATE TABLE \"Weights\" ("
+                          " `ActivityID` INTEGER NOT NULL,"
+                          " `LastUpdated` TEXT NOT NULL,"
+                          " `Weight` INTEGER NOT NULL,"
+                          " PRIMARY KEY(`ActivityID`,`LastUpdated`)"
+                          " )");
+
+    QSqlQuery triggerActivityToWeights("CREATE TRIGGER add_new_activity_to_weights "
+                                       "AFTER INSERT ON DictActivity "
+                                       "BEGIN insert into Weights "
+                                       "(ActivityID, LastUpdated, Weight) "
+                                       "values (new.ActivityID, datetime('now', 'localtime'), new.Weight); "
+                                       "END");
+
+    QSqlQuery triggerUpdateActivityWeight("CREATE TRIGGER update_activity_weight "
+                                          "AFTER INSERT ON Weights "
+                                          "BEGIN update DictActivity "
+                                          "set Weight = new.Weight "
+                                          "where DictActivity.ActivityID = new.ActivityID; "
+                                          "END");
+
+    if (!makeDaily.exec())
+    {
+        qDebug() << "Could not create " DailySchedule;
+        makeDaily.lastError();
+        return false;
+    }
+
+    if (!makeHistory.exec())
+    {
+        qDebug() << "Could not create " HistorySchedule;
+        makeHistory.lastError();
+        return false;
+    }
+
+    if (!makeDictionary.exec())
+    {
+        qDebug() << "Could not create " DictActivity;
+        makeDictionary.lastError();
+        return false;
+    }
+
+    if (!makeWeights.exec())
+    {
+        qDebug() << "Could not create Weights";
+        makeWeights.lastError();
+        return false;
+    }
+
+    if (!triggerActivityToWeights.exec())
+    {
+        qDebug() << "Could not create trigger add_new_activity_to_weights";
+        triggerActivityToWeights.lastError();
+        return false;
+    }
+
+    if (!triggerUpdateActivityWeight.exec())
+    {
+        qDebug() << "Could not create trigger update_activity_weight";
+        triggerUpdateActivityWeight.lastError();
+        return false;
+    }
+
+    return true;
+}
+
+bool DataBase::open()
+{
+    QString dbPath = setPath();
+
     if(!QFile(dbPath).exists())
     {
-        qDebug() << "DataBase::connect::\t\tDB path not found";
+        qDebug() << "DataBase::open::\t\tDB path not found";
         return false;
     }
 
@@ -30,7 +144,7 @@ bool DataBase::open(const QString &dbPath)
     if (db.open())
     {
         initActivityMap();
-        initFrequency();
+        updateFrequency();
         archiveJob();
         return  true;
     }
@@ -48,7 +162,7 @@ void DataBase::archiveJob()
         fillSpaces();
         archiveActivities();
         clearDailySchedule();
-        initFrequency();
+        updateFrequency();
     }
     else
         qDebug() << "DataBase::archiveJob\t\t " HistorySchedule" is up to date";
@@ -59,9 +173,9 @@ void DataBase::close()
     db.close();
 }
 
-//------------------------------------getters
+//------------------------------------frequency
 
-int DataBase::setFrequency(int id)
+int DataBase::writeFrequency(int id)
 {
 //    qDebug() << "DataBase::setFrequency::\t" << id;
     int frequency = 0;
@@ -88,16 +202,15 @@ int DataBase::setFrequency(int id)
     return frequency;
 }
 
-void DataBase::initFrequency()
+void DataBase::updateFrequency()
 {
     qDebug() << "DataBase::initFrequency::\t";
     QSqlQuery activities("select ActivityID from " DictActivity"");
 
     while(activities.next())
-        setFrequency(activities.value(0).toInt());
+        writeFrequency(activities.value(0).toInt());
     qDebug() << "DataBase::initFrequency::\t";
 }
-
 
 void DataBase::getFrequency(QMap<QString, int> &result)
 {
@@ -111,7 +224,7 @@ void DataBase::getFrequency(QMap<QString, int> &result)
         int frequency;
 
         if (query.isNull(1))
-            frequency = setFrequency(query.value(2).toInt());
+            frequency = writeFrequency(query.value(2).toInt());
         else
             frequency = query.value(1).toInt();
 
@@ -200,8 +313,6 @@ std::vector<std::vector<QDateTime> > DataBase::getFilledTime()
         QDateTime begin = dailyQuery.value(0).toDateTime();
         QDateTime end = dailyQuery.value(1).toDateTime();
 
-//        qDebug() << matrix.size() << " " << begin.toString("yyyy-MM-dd HH:mm:ss.zzz") << " " << end.toString("yyyy-MM-dd HH:mm:ss.zzz");
-
         bool addFlag = true;//if date does not cross any of existing, append as new date
 
         for (unsigned int i = 0; i < matrix.size(); i++)
@@ -209,37 +320,22 @@ std::vector<std::vector<QDateTime> > DataBase::getFilledTime()
             QDateTime checkBegin = matrix[i].at(0);
             QDateTime checkEnd = matrix[i].at(1);
 
-//            qDebug() << "check borders\t" << checkBegin.toString("yyyy-MM-dd HH:mm:ss.zzz") << " " << checkEnd.toString("yyyy-MM-dd HH:mm:ss.zzz");
-//            qDebug() << (checkBegin.secsTo(begin) > 0) << " && " << (checkEnd.secsTo(begin) < 0) << " || " << (checkBegin.secsTo(end) > 0) << " && " << (checkEnd.secsTo(end) < 0);
             if (((checkBegin.secsTo(begin) >= 0) && (checkEnd.secsTo(begin) <= 0))// if one of the dates between existing
                || ((checkBegin.secsTo(end) >= 0) && (checkEnd.secsTo(end) <= 0)))
             {
                 addFlag = false;
-//                qDebug() << "gotcha";
 
                 if (((checkBegin.secsTo(begin) >= 0) && (checkEnd.secsTo(begin) <= 0))// only first one is between
                     && !((checkBegin.secsTo(end) >= 0) && (checkEnd.secsTo(end) <= 0)))
-                {
-//                    qDebug() << checkBegin.toString("yyyy-MM-dd HH:mm:ss.zzz") << " < " << begin.toString("yyyy-MM-dd HH:mm:ss.zzz") << " < " << checkEnd.toString("yyyy-MM-dd HH:mm:ss.zzz");
-//                    qDebug() << "expanding\t" << checkEnd.toString("yyyy-MM-dd HH:mm:ss.zzz") << " to " << end.toString("yyyy-MM-dd HH:mm:ss.zzz");
-                    matrix[i].at(1) = end;
-//                    matrix[i].replace(1, end);// expand borders of existing
-                }
+                        matrix[i].at(1) = end;
                 else if (!((checkBegin.secsTo(begin) >= 0) && (checkEnd.secsTo(begin) <= 0))// only last one is between
                          && ((checkBegin.secsTo(end) >= 0) && (checkEnd.secsTo(end) <= 0)))
-                {
-//                    qDebug() << checkBegin.toString("yyyy-MM-dd HH:mm:ss.zzz") << " < " << end.toString("yyyy-MM-dd HH:mm:ss.zzz") << " < " << checkEnd.toString("yyyy-MM-dd HH:mm:ss.zzz");
-//                    qDebug() << "expanding\t" << checkBegin.toString("yyyy-MM-dd HH:mm:ss.zzz") << " to " << begin.toString("yyyy-MM-dd HH:mm:ss.zzz");
-                    matrix[i].at(0) = begin;
-//                    matrix[i].replace(0, begin);// expand borders of existing
-                }
+                        matrix[i].at(0) = begin;
             }
         }
 
         if (addFlag)
         {
-//            qDebug() << "create new";
-
             std::vector<QDateTime> newItem;
 
             newItem.push_back(begin);
@@ -272,10 +368,7 @@ void DataBase::archiveActivities()
     QSqlQuery currQuery("select ActivityId, BeginDate, EndDate from " DailySchedule" where date(BeginDate) < date ('now') order by BeginDate");
 
     while(currQuery.next())
-    {
-//        qDebug() << "inserting " << currQuery.value(0).toInt() << " " << currQuery.value(1).toDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz") << " " << currQuery.value(2).toDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz");
         insertActivityHistory(&currQuery);
-    }
     qDebug() << "DataBase::archiveActivities\t\t complete";
 }
 

@@ -26,6 +26,8 @@ public:
 private slots:
     void importButtonClicked();
 
+    void exportButtonClicked();
+
 private:
 
     Ui::MenuWindow *m_ui;

@@ -17,7 +17,7 @@ public:
     explicit DataBase(QObject *parent = nullptr);
     ~DataBase();
 
-    bool open(const QString &dbPath);
+    bool open();
     bool insertActivityDaily(int id, const QDateTime &begin, const QDateTime &end);
 
     QString findName(int id);
@@ -25,6 +25,7 @@ public:
     int findId(QString &name);
     void archiveJob();
     void getFrequency(QMap<QString, int>& frequency);
+    QString path();
 
 private:
 
@@ -39,11 +40,12 @@ private:
     void archiveActivities();
     void fillSpaces();
     void separateDate(const int id, const QDateTime &begin, const QDateTime &end);
+    bool createDB();
 
-    int setFrequency(int id);
+    int writeFrequency(int id);
     void close();
     void initActivityMap();
-    void initFrequency();
+    void updateFrequency();
 
     QMap<QString, int> activityMap;
     QSqlDatabase db;

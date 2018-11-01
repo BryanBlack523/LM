@@ -7,6 +7,7 @@
 #include "mainwindow.h"
 
 QScopedPointer<QFile>   m_logFile;
+bool logging = true;
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -41,13 +42,37 @@ void createWorkDir()
     }
 }
 
+QString createLogDir()
+{
+    auto pathLogLocation = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/LM/";
+    if (pathLogLocation.isEmpty())
+        qFatal("Cannot determine data storage location");
+
+    QDir logDirectory{pathLogLocation};
+    if (logDirectory.mkpath(logDirectory.absolutePath()))
+    {
+        qDebug() << pathLogLocation << " created";
+    }
+
+    return pathLogLocation;
+}
+
+void enableLog()
+{
+    if (logging)
+    {
+        QString logPath = createLogDir() + "LMlog.txt";
+        m_logFile.reset(new QFile(logPath));
+
+        m_logFile.data()->open(QFile::Append | QFile::Text);
+
+        qInstallMessageHandler(myMessageOutput);
+    }
+}
+
 int main(int argc, char *argv[])
 {
-    m_logFile.reset(new QFile("C:/example/logFile.txt"));
-    // Open the file logging
-    m_logFile.data()->open(QFile::Append | QFile::Text);
-
-    qInstallMessageHandler(myMessageOutput);
+    enableLog();
 
     QApplication application(argc, argv);
 

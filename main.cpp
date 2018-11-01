@@ -2,35 +2,34 @@
 #include <QDebug>
 #include <QDir>
 #include <QStandardPaths>
+#include <QDateTime>
 
 #include "mainwindow.h"
 
+QScopedPointer<QFile>   m_logFile;
+
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    QByteArray localMsg = msg.toLocal8Bit();
-    switch (type) {
-    case QtDebugMsg:
-        fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-        break;
-    case QtInfoMsg:
-        fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-        break;
-    case QtWarningMsg:
-        fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-        break;
-    case QtCriticalMsg:
-        fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-        break;
-    case QtFatalMsg:
-        fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-        break;
+    QTextStream out(m_logFile.data());
+
+    out << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz ");
+
+    switch (type)
+    {
+    case QtInfoMsg:     out << "INF "; break;
+    case QtDebugMsg:    out << "DBG "; break;
+    case QtWarningMsg:  out << "WRN "; break;
+    case QtCriticalMsg: out << "CRT "; break;
+    case QtFatalMsg:    out << "FTL "; break;
     }
+    // Write to the output category of the message and the message itself
+    out << context.category << ": "
+        << msg << endl;
+    out.flush();    // Clear the buffered data
 }
 
 void createWorkDir()
 {
-
-
     auto pathDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     if (pathDataLocation.isEmpty())
         qFatal("Cannot determine data storage location");
@@ -44,6 +43,10 @@ void createWorkDir()
 
 int main(int argc, char *argv[])
 {
+    m_logFile.reset(new QFile("C:/example/logFile.txt"));
+    // Open the file logging
+    m_logFile.data()->open(QFile::Append | QFile::Text);
+
     qInstallMessageHandler(myMessageOutput);
 
     QApplication application(argc, argv);

@@ -17,7 +17,4 @@ public:
 private:
 
     bool timeIsValid() const;
-
-    QElapsedTimer timer;
-
 };

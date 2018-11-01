@@ -18,7 +18,7 @@ DataBase::DataBase(QObject *parent)
 
 DataBase::~DataBase(){}
 
-QString DataBase::setPath()
+QString DataBase::path()
 {
     QDir resultPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/data/";
 
@@ -130,7 +130,7 @@ bool DataBase::createDB()
 
 bool DataBase::open()
 {
-    QString dbPath = setPath();
+    QString dbPath = path();
 
     if(!QFile(dbPath).exists())
     {

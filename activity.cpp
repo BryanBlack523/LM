@@ -5,24 +5,22 @@
 Activity::Activity(const QString &name)
   : name(name)
   , beginDate(QDateTime::currentDateTime())
-{
-    timer.start();
-}
+{}
 
 Activity::~Activity()
 {
     if (timeIsValid())
-        qDebug() << "Activity: " << name << " started " << beginDate.toString("yyyy-MM-dd HH:mm:ss.zzz") << " elapsed " << timer.elapsed();
+        qDebug() << "Activity: " << name << " started " << beginDate.toString("yyyy-MM-dd HH:mm:ss.zzz") << " elapsed " << elapsedTime();
     else
-        qDebug() << "Activity is not valid: " << name << " started " << beginDate.toString("yyyy-MM-dd HH:mm:ss.zzz") << " elapsed " << timer.elapsed();
+        qDebug() << "Activity is not valid: " << name << " started " << beginDate.toString("yyyy-MM-dd HH:mm:ss.zzz") << " elapsed " << elapsedTime();
 }
 
 qint64 Activity::elapsedTime() const
 {
-    return timer.elapsed();
+    return beginDate.msecsTo(QDateTime::currentDateTime());
 }
 
 bool Activity::timeIsValid() const
 {
-    return timer.elapsed() >= 30000;  //30s
+    return elapsedTime() >= 30000;  //30s
 }
